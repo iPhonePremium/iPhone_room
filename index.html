@@ -3,241 +3,586 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#08070c">
+<meta name="theme-color" content="#030303">
 <title>iPhoneの部屋</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Shippori+Mincho:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+/* =========================================
+   BASE STYLES & VARIABLES
+   ========================================= */
+:root {
+  --bg: #030303;
+  --panel: rgba(10, 5, 10, 0.85);
+  --line: rgba(150, 0, 50, 0.3);
+  --text: #dcdcdc;
+  --muted: #7a7a7a;
+  --accent: #b90000;
+  --purple: #6a008a;
+  --glitch-1: #ff003c;
+  --glitch-2: #00e5ff;
+}
 
-:root{
-  --bg:#07070a; --panel:rgba(16,14,22,.78); --line:rgba(202,174,255,.16);
-  --text:#eeeaf7; --muted:#9690a5; --purple:#b18cff; --pink:#e5a7ff;
-  --shadow:0 20px 70px rgba(0,0,0,.55);
+* { box-sizing: border-box; cursor: none; /* カスタムカーソルのため非表示 */ }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Noto Sans JP", sans-serif;
+  overflow-x: hidden;
+  transition: background-color 2s ease;
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0; background:var(--bg); color:var(--text);
-  font-family:"Noto Sans JP",sans-serif; overflow-x:hidden;
+
+/* =========================================
+   OVERLAYS (ノイズ・スキャンライン)
+   ========================================= */
+.crt-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 6px 100%;
 }
-body::before{
-  content:""; position:fixed; inset:0; pointer-events:none; z-index:20; opacity:.11;
-  background-image:radial-gradient(rgba(255,255,255,.35) .6px,transparent .6px);
-  background-size:5px 5px; mix-blend-mode:screen;
+.noise-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.06;
+  background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
 }
-body::after{
-  content:""; position:fixed; inset:0; pointer-events:none; z-index:19;
-  background:radial-gradient(circle at 50% 30%, transparent 20%, rgba(0,0,0,.55) 100%);
+.vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9997;
+  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.9) 100%);
 }
-a{color:inherit;text-decoration:none}
-.nav{
-  position:fixed; top:0; left:0; right:0; z-index:30;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:18px 5vw; background:rgba(5,5,8,.58); backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--line);
+
+/* =========================================
+   CUSTOM CURSOR
+   ========================================= */
+.cursor-dot, .cursor-outline {
+  position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+  border-radius: 50%; z-index: 10000; pointer-events: none;
 }
-.logo{font-family:"IBM Plex Mono",monospace; letter-spacing:.14em; font-weight:600}
-.logo span{color:var(--purple)}
-.navlinks{display:flex;gap:24px;font-size:12px;color:#aaa3b7}
-.navlinks a:hover{color:#fff}
-.hero{
-  min-height:100vh; display:grid; place-items:end start; position:relative; isolation:isolate;
-  background:
-    linear-gradient(180deg,rgba(0,0,0,.48),rgba(0,0,0,.18) 35%,rgba(7,7,10,.98) 94%),
-    url("images/room-01.png") center/cover no-repeat;
+.cursor-dot { width: 4px; height: 4px; background-color: var(--accent); }
+.cursor-outline {
+  width: 30px; height: 30px; border: 1px solid rgba(185, 0, 0, 0.5);
+  transition: width 0.2s, height 0.2s, background-color 0.2s;
 }
-.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.72),transparent 65%);z-index:-1}
-.hero-content{width:min(1100px,90%);margin:0 auto;padding:0 0 12vh}
-.kicker{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.3em;color:var(--purple);margin-bottom:18px}
-h1{font-size:clamp(46px,8vw,104px);line-height:.92;margin:0 0 20px;letter-spacing:-.06em}
-.hero p{max-width:620px;color:#b8b1c2;line-height:1.9;margin:0 0 28px}
-.btn{
-  display:inline-flex;align-items:center;gap:10px;padding:13px 18px;border:1px solid var(--line);
-  background:rgba(10,9,15,.7);border-radius:999px;font-size:13px;transition:.25s;
+.cursor-outline.hover { width: 50px; height: 50px; background-color: rgba(185, 0, 0, 0.1); border-color: var(--accent); }
+.ripple {
+  position: fixed; border-radius: 50%; border: 1px solid var(--accent);
+  pointer-events: none; z-index: 9999; transform: translate(-50%, -50%) scale(1);
+  animation: rippleAnim 0.6s ease-out forwards;
 }
-.btn:hover{transform:translateY(-2px);border-color:rgba(202,174,255,.5);box-shadow:0 10px 35px rgba(120,70,180,.18)}
-.clock{position:absolute;right:5vw;bottom:7vh;text-align:right;font:500 13px "IBM Plex Mono",monospace;color:#b6afc0}
-.clock strong{display:block;font-size:26px;color:#e9e3f2;margin-bottom:5px}
-.section{width:min(1100px,90%);margin:0 auto;padding:110px 0}
-.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:30px}
-.eyebrow{font:500 10px "IBM Plex Mono",monospace;color:var(--purple);letter-spacing:.25em}
-h2{font-size:34px;margin:8px 0 0;letter-spacing:-.04em}
-.note{font-size:12px;color:var(--muted);max-width:360px;line-height:1.8}
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-.card{
-  background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;
-  box-shadow:var(--shadow);backdrop-filter:blur(12px);
+@keyframes rippleAnim {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
 }
-.card img{width:100%;display:block;aspect-ratio:16/10;object-fit:cover;filter:saturate(.72) contrast(1.08);transition:.5s}
-.card:hover img{transform:scale(1.025);filter:saturate(.95) contrast(1.1)}
-.card-body{padding:22px}
-.card-body h3{margin:0 0 8px;font-size:18px}
-.card-body p{margin:0;color:#9e98aa;font-size:13px;line-height:1.8}
-.profile{
-  display:grid;grid-template-columns:.75fr 1.25fr;gap:18px;align-items:stretch
+
+/* =========================================
+   TYPOGRAPHY & GLITCH
+   ========================================= */
+h1, h2, h3, .mincho { font-family: "Shippori Mincho", serif; }
+a, button { cursor: none; }
+a:hover { color: #fff; }
+
+.glitch {
+  position: relative; display: inline-block; font-weight: 800;
+  text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.025em -0.05em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75);
+  animation: glitch-anim 3s infinite;
 }
-.profile .portrait img{height:100%;min-height:470px;object-fit:cover;object-position:center top}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:22px}
-.stat{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
-.stat small{display:block;color:#777181;font:10px "IBM Plex Mono",monospace;margin-bottom:7px}
-.stat b{font-size:14px}
-.quote{
-  margin-top:22px;padding:20px;border-left:2px solid var(--purple);
-  background:linear-gradient(90deg,rgba(177,140,255,.08),transparent);color:#c5becd;
-  font-size:13px;line-height:1.9
+.glitch::before, .glitch::after {
+  content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
 }
-.gallery{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.gallery .wide{grid-column:1/-1}
-.gallery figure{margin:0;position:relative;cursor:pointer;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:#0b0a0f}
-.gallery img{display:block;width:100%;height:360px;object-fit:cover;transition:.45s;filter:brightness(.72) saturate(.8)}
-.gallery .wide img{height:430px}
-.gallery figure:hover img{transform:scale(1.035);filter:brightness(.9) saturate(.95)}
-.caption{position:absolute;left:16px;bottom:14px;font:11px "IBM Plex Mono",monospace;color:#e9e1f2;background:rgba(0,0,0,.55);padding:7px 10px;border-radius:8px}
-.memo{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.memo article{padding:22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(177,140,255,.07),rgba(255,255,255,.018))}
-.memo .date{font:10px "IBM Plex Mono",monospace;color:#746c80;margin-bottom:14px}
-.memo h3{font-size:15px;margin:0 0 10px}
-.memo p{font-size:12px;line-height:1.9;color:#9e98a7;margin:0}
-.secret{
-  text-align:center;padding:85px 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  background:radial-gradient(circle at center,rgba(100,65,145,.13),transparent 55%);
+.glitch::before {
+  left: 2px; text-shadow: -2px 0 var(--glitch-1);
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  animation: glitch-anim-2 4s infinite linear alternate-reverse;
 }
-.secret p{color:#817b8b;font-size:12px}
-.footer{padding:45px 5vw 55px;color:#625d69;font:10px "IBM Plex Mono",monospace;text-align:center;letter-spacing:.12em}
-.modal{
-  position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.86);backdrop-filter:blur(10px);
-  display:none;align-items:center;justify-content:center;padding:25px;
+.glitch::after {
+  left: -2px; text-shadow: -2px 0 var(--glitch-2);
+  clip-path: polygon(0 80%, 100% 20%, 100% 100%, 0 100%);
+  animation: glitch-anim-2 5s infinite linear alternate-reverse;
 }
-.modal.open{display:flex}
-.modal img{max-width:95vw;max-height:88vh;border:1px solid var(--line);box-shadow:0 30px 100px #000}
-.close{position:fixed;top:22px;right:25px;border:0;background:transparent;color:#fff;font-size:30px;cursor:pointer}
-body.secret-mode{--purple:#ff6caa;--pink:#ff9ac6}
-body.secret-mode .hero{filter:hue-rotate(12deg)}
-@media(max-width:760px){
-  .nav{padding:15px 5vw}.navlinks{display:none}
-  .hero{min-height:88vh;background-position:62% center}
-  .hero-content{padding-bottom:9vh}.hero p{font-size:13px}
-  .clock{display:none}.section{padding:75px 0}
-  .section-head{display:block}.note{margin-top:12px}
-  .grid,.profile,.gallery,.memo{grid-template-columns:1fr}
-  .gallery .wide{grid-column:auto}.gallery img,.gallery .wide img{height:330px}
-  .profile .portrait img{min-height:390px}
+@keyframes glitch-anim {
+  0% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
+  14% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), -0.025em 0.05em 0 rgba(0,0,255,0.75); }
+  15% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
+  49% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
+  50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
+  99% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
+  100% { text-shadow: -0.025em 0 0 rgba(255,0,0,0.75), -0.025em -0.025em 0 rgba(0,255,0,0.75), -0.025em -0.05em 0 rgba(0,0,255,0.75); }
+}
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 2px); }
+  20% { clip-path: inset(80% 0 10% 0); transform: translate(2px, -2px); }
+  40% { clip-path: inset(40% 0 50% 0); transform: translate(2px, 2px); }
+  60% { clip-path: inset(90% 0 5% 0); transform: translate(-2px, -2px); }
+  80% { clip-path: inset(20% 0 70% 0); transform: translate(2px, -2px); }
+  100% { clip-path: inset(60% 0 30% 0); transform: translate(-2px, 2px); }
+}
+
+/* =========================================
+   LAYOUT & SECTIONS
+   ========================================= */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 5vw; background: linear-gradient(rgba(0,0,0,0.8), transparent);
+}
+.logo { font-family: "Share Tech Mono", monospace; letter-spacing: 0.1em; color: var(--text); text-decoration: none; font-size: 14px;}
+.logo span { color: var(--accent); }
+.navlinks { display: flex; gap: 30px; font-size: 11px; font-family: "Share Tech Mono", monospace; letter-spacing: 0.2em;}
+
+.hero {
+  height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  position: relative; padding: 0 10vw;
+  background: radial-gradient(circle at 70% 50%, rgba(0,0,0,0.2), rgba(3,3,3,1) 80%), url("room-01.png") center/cover no-repeat;
+  background-attachment: fixed;
+}
+.hero::after {
+  content: ""; position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.7); z-index: 0;
+}
+.hero-content { position: relative; z-index: 10; max-width: 800px; }
+.kicker { font: 400 12px "Share Tech Mono", monospace; color: var(--accent); letter-spacing: 0.4em; margin-bottom: 20px; }
+h1 { font-size: clamp(50px, 10vw, 120px); line-height: 1; margin: 0 0 20px; letter-spacing: -0.05em; color: #fff; }
+.hero p { font-size: 16px; line-height: 2; color: #a0a0a0; margin-bottom: 40px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+
+.clock-container {
+  position: absolute; right: 5vw; bottom: 8vh; z-index: 10;
+  text-align: right; font-family: "Share Tech Mono", monospace;
+}
+.clock { font-size: 40px; color: var(--accent); font-weight: bold; text-shadow: 0 0 10px rgba(185,0,0,0.5); letter-spacing: 2px;}
+.date { font-size: 14px; color: #666; margin-top: 5px; letter-spacing: 4px;}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px;
+  background: transparent; border: 1px solid var(--accent); color: var(--text);
+  font-family: "Share Tech Mono", monospace; font-size: 12px; letter-spacing: 0.2em;
+  transition: all 0.3s; position: relative; overflow: hidden; text-decoration: none;
+}
+.btn::before {
+  content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: var(--accent); transition: left 0.3s ease; z-index: -1;
+}
+.btn:hover::before { left: 0; }
+.btn:hover { color: #fff; box-shadow: 0 0 20px rgba(185, 0, 0, 0.4); text-shadow: 0 0 5px #fff;}
+
+.section { width: min(1200px, 90%); margin: 0 auto; padding: 150px 0; position: relative; z-index: 10; }
+.section-head { margin-bottom: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; }
+.eyebrow { font: 400 12px "Share Tech Mono", monospace; color: var(--accent); letter-spacing: 0.3em; margin-bottom: 10px; }
+h2 { font-size: 42px; margin: 0; }
+
+/* 共通フェードイン用クラス */
+.fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* Profile */
+.profile { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; }
+.card {
+  background: var(--panel); border: 1px solid rgba(255,255,255,0.05);
+  padding: 40px; position: relative; overflow: hidden;
+}
+.card::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--accent);
+}
+.portrait-wrap { position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 3/4;}
+.portrait-wrap img {
+  width: 100%; height: 100%; object-fit: cover; filter: grayscale(80%) contrast(1.2);
+  transition: filter 0.5s, transform 0.5s;
+}
+.portrait-wrap:hover img { filter: grayscale(0%) contrast(1.5); transform: scale(1.05); }
+
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 30px; font-family: "Share Tech Mono", monospace;}
+.stat { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+.stat small { display: block; color: var(--accent); font-size: 10px; letter-spacing: 2px; margin-bottom: 5px; }
+.stat b { font-size: 16px; color: #ddd; }
+
+.quote {
+  margin-top: 40px; padding: 20px; font-size: 18px; line-height: 1.8;
+  font-style: italic; color: #aaa; background: rgba(0,0,0,0.5);
+  border-left: 4px solid var(--accent);
+}
+
+/* Gallery */
+.gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.gallery .wide { grid-column: 1 / -1; }
+.gallery figure {
+  margin: 0; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
+  aspect-ratio: 16/9; background: #000;
+}
+.gallery .wide { aspect-ratio: 21/9; }
+.gallery img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: brightness(0.4) sepia(0.5) hue-rotate(-50deg) saturate(1.5);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.gallery figure:hover img {
+  transform: scale(1.05); filter: brightness(1) sepia(0) saturate(1.2);
+}
+.caption {
+  position: absolute; bottom: 15px; right: 15px; font: 12px "Share Tech Mono";
+  color: #fff; background: var(--accent); padding: 5px 10px;
+  transform: translateX(20px); opacity: 0; transition: 0.3s;
+}
+.gallery figure:hover .caption { transform: translateX(0); opacity: 1; }
+
+/* Memo (Typing Effect) */
+.memo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.memo article {
+  padding: 30px; background: rgba(10,10,10,0.8); border-top: 1px solid var(--accent);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.memo .date { font: 11px "Share Tech Mono"; color: var(--accent); margin-bottom: 15px; letter-spacing: 2px;}
+.memo h3 { font-size: 18px; margin: 0 0 15px; color: #fff; }
+.type-text { font-size: 14px; line-height: 2; color: #999; min-height: 80px;}
+
+/* Secret */
+.secret {
+  text-align: center; padding: 150px 20px; position: relative;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.secret h2 { margin-bottom: 30px; font-size: 32px; }
+
+/* Modal */
+.modal {
+  position: fixed; inset: 0; z-index: 100000; background: rgba(0,0,0,0.95);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.4s;
+}
+.modal.open { opacity: 1; pointer-events: auto; }
+.modal img {
+  max-width: 90vw; max-height: 90vh; border: 2px solid var(--accent);
+  box-shadow: 0 0 50px rgba(185,0,0,0.3);
+  animation: modalImgPulse 4s infinite alternate;
+}
+@keyframes modalImgPulse {
+    0% { filter: brightness(0.8) contrast(1.2); }
+    100% { filter: brightness(1.1) contrast(1.5); }
+}
+.close-modal {
+  position: absolute; top: 30px; right: 40px; color: #fff; font-size: 40px;
+  background: none; border: none; font-family: "Share Tech Mono";
+}
+
+/* =========================================
+   SECRET MODE (狂気モード)
+   ========================================= */
+body.insane-mode {
+  background: #2a0000;
+  --panel: rgba(50, 0, 0, 0.8);
+  --text: #ff9999;
+  --accent: #ff0000;
+}
+body.insane-mode .crt-overlay {
+  background: linear-gradient(rgba(255, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.5) 50%);
+  background-size: 100% 4px;
+}
+body.insane-mode * { font-family: "Shippori Mincho", serif !important; }
+body.insane-mode .glitch { animation: glitch-anim 0.5s infinite; color: #fff; text-shadow: 0 0 20px red; }
+body.insane-mode img { filter: invert(1) hue-rotate(180deg) saturate(3) !important; animation: shake 0.2s infinite; }
+
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.falling-text {
+  position: fixed; color: rgba(255,0,0,0.5); font-size: 24px; pointer-events: none;
+  z-index: 9996; white-space: nowrap; font-weight: bold;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translateY(110vh); }
+}
+
+@media(max-width: 768px) {
+  .navlinks { display: none; }
+  h1 { font-size: 40px; }
+  .profile, .gallery, .memo { grid-template-columns: 1fr; }
+  .clock-container { display: none; }
+  .cursor-dot, .cursor-outline { display: none; }
+  * { cursor: auto; }
 }
 </style>
 </head>
 <body>
 
+<!-- Overlays -->
+<div class="noise-overlay"></div>
+<div class="crt-overlay"></div>
+<div class="vignette"></div>
+
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-outline" id="cursor-outline"></div>
+
 <header class="nav">
-  <a class="logo" href="#top">iPhone<span>_</span>の部屋</a>
+  <a class="logo" href="#top">iPhone<span>_</span>ROOM</a>
   <nav class="navlinks">
     <a href="#about">PROFILE</a>
     <a href="#gallery">GALLERY</a>
     <a href="#memo">MEMO</a>
-    <a href="#secret">?</a>
+    <a href="#secret">???</a>
   </nav>
 </header>
 
 <main id="top">
-<section class="hero">
-  <div class="hero-content">
-    <div class="kicker">PRIVATE ROOM / 00:00</div>
-    <h1>iPhone<br>の部屋。</h1>
-    <p>ここは、iPhoneの記録と画像を置いておくための小さな部屋。<br>
-      少し暗くて、少し壊れていて、それでもまだ消えない。</p>
-    <a class="btn" href="#gallery">部屋を覗く　↘</a>
-  </div>
-  <div class="clock"><strong id="time">00:00:00</strong><span id="date">----</span></div>
-</section>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="kicker">SYSTEM: ONLINE / STATUS: UNSTABLE</div>
+      <h1 class="glitch" data-text="iPhoneの部屋。">iPhoneの部屋。</h1>
+      <p class="mincho fade-up">ここは、記録と画像を置いておくための小さな部屋。<br>
+        少し暗くて、少し壊れていて、それでもまだ、私を見ている。</p>
+      <a class="btn fade-up" href="#gallery">部屋を覗く</a>
+    </div>
+    <div class="clock-container">
+      <div class="clock" id="clock">00:00:00:000</div>
+      <div class="date" id="date">----.--.--</div>
+    </div>
+  </section>
 
-<section class="section" id="about">
-  <div class="section-head">
-    <div><div class="eyebrow">01 / PROFILE</div><h2>iPhoneについて</h2></div>
-    <div class="note">ここでの「iPhone」は商品名ではなく、この部屋にいる存在の名前。</div>
-  </div>
-  <div class="profile">
-    <div class="card portrait"><img src="images/kafu-01.png" alt="部屋のイメージ"></div>
-    <div class="card">
-      <div class="card-body">
+  <section class="section" id="about">
+    <div class="section-head fade-up">
+      <div class="eyebrow">01 // ENTITY_DATA</div>
+      <h2 class="glitch" data-text="iPhoneについて">iPhoneについて</h2>
+    </div>
+    <div class="profile fade-up">
+      <div class="portrait-wrap">
+        <img src="kafu-01.png" alt="部屋のイメージ">
+      </div>
+      <div class="card">
         <div class="eyebrow">UNKNOWN ENTITY</div>
-        <h3>iPhone</h3>
-        <p>何を考えているのかは、まだよく分からない。画像、言葉、記録だけが少しずつ残っている。</p>
+        <h3 class="mincho" style="font-size: 28px; margin: 10px 0;">iPhone</h3>
+        <p class="mincho" style="color: #bbb; line-height: 1.8;">何を考えているのかは、まだよく分からない。画像、言葉、記録だけが少しずつ残っている。時折、ノイズの中に声が混じる。</p>
         <div class="stats">
           <div class="stat"><small>MOOD</small><b>UNSTABLE</b></div>
-          <div class="stat"><small>COLOR</small><b>PURPLE / BLACK</b></div>
-          <div class="stat"><small>STATUS</small><b>ONLINE</b></div>
-          <div class="stat"><small>LOCATION</small><b>MY ROOM</b></div>
+          <div class="stat"><small>THREAT_LEVEL</small><b>UNKNOWN</b></div>
+          <div class="stat"><small>STATUS</small><b>WATCHING_YOU</b></div>
+          <div class="stat"><small>LOCATION</small><b>BEHIND_SCREEN</b></div>
         </div>
-        <div class="quote">「逃げなくていいよ。ここにいるなら、ずっと見てるから。」</div>
+        <div class="quote mincho">
+          「逃げなくていいよ。ここにいるなら、ずっと見てるから。」
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="section" id="gallery">
-  <div class="section-head">
-    <div><div class="eyebrow">02 / GALLERY</div><h2>部屋に残った画像</h2></div>
-    <div class="note">画像をタップすると大きく表示できます。</div>
-  </div>
-  <div class="gallery">
-    <figure class="wide"><img src="room-01.png" alt="暗い部屋の記録"><span class="caption">REC_001 / 23:57:39</span></figure>
-    <figure><img src="room-02.png" alt="複数の人物が写る記録"><span class="caption">REC_002 / UNKNOWN</span></figure>
-    <figure><img src="kafu-01.png" alt="可不のイメージ"><span class="caption">REC_003 / KAFU</span></figure>
-  </div>
-</section>
+  <section class="section" id="gallery">
+    <div class="section-head fade-up">
+      <div class="eyebrow">02 // VISUAL_LOGS</div>
+      <h2 class="glitch" data-text="残された視覚記録">残された視覚記録</h2>
+    </div>
+    <div class="gallery fade-up">
+      <figure class="wide">
+        <img src="room-01.png" alt="暗い部屋の記録" class="zoomable">
+        <span class="caption">REC_001 // THE_ROOM</span>
+      </figure>
+      <figure>
+        <img src="room-02.png" alt="複数の人物が写る記録" class="zoomable">
+        <span class="caption">REC_002 // THEY_ARE_HERE</span>
+      </figure>
+      <figure>
+        <img src="kafu-01.png" alt="可不のイメージ" class="zoomable">
+        <span class="caption">REC_003 // SHE_SMILES</span>
+      </figure>
+    </div>
+  </section>
 
-<section class="section" id="memo">
-  <div class="section-head">
-    <div><div class="eyebrow">03 / MEMO</div><h2>記録</h2></div>
-    <div class="note">あとから好きな文章に書き換えられる場所。</div>
-  </div>
-  <div class="memo">
-    <article><div class="date">20XX.08.08</div><h3>今日も部屋にいる。</h3><p>時計だけが動いている。画面の向こうには誰もいないはずなのに、視線を感じる。</p></article>
-    <article><div class="date">20XX.08.07</div><h3>画像を追加した。</h3><p>この部屋の写真が増えていく。何枚まで増えたら、部屋と呼べなくなるんだろう。</p></article>
-    <article><div class="date">UNKNOWN</div><h3>名前だけが残っている。</h3><p>iPhone。たったそれだけ。ほかのことは、まだ秘密。</p></article>
-  </div>
-</section>
+  <section class="section" id="memo">
+    <div class="section-head fade-up">
+      <div class="eyebrow">03 // TEXT_LOGS</div>
+      <h2 class="glitch" data-text="思考の断片">思考の断片</h2>
+    </div>
+    <div class="memo fade-up">
+      <article>
+        <div class="date">202X.08.08</div>
+        <h3 class="mincho">今日も部屋にいる。</h3>
+        <div class="type-text" data-text="時計だけが動いている。画面の向こうには誰もいないはずなのに、視線を感じる。誰かが見ている。"></div>
+      </article>
+      <article>
+        <div class="date">202X.08.07</div>
+        <h3 class="mincho">画像を追加した。</h3>
+        <div class="type-text" data-text="この部屋の写真が増えていく。何枚まで増えたら、部屋と呼べなくなるんだろう。息苦しい。"></div>
+      </article>
+      <article>
+        <div class="date">ERR.UNKNOWN</div>
+        <h3 class="mincho">名前だけが残っている。</h3>
+        <div class="type-text" data-text="iPhone。たったそれだけ。ほかのことは、まだ秘密。でも、もうすぐ全てわかる。"></div>
+      </article>
+    </div>
+  </section>
 
-<section class="secret" id="secret">
-  <div class="eyebrow">04 / HIDDEN ROOM</div>
-  <h2>まだ帰らない？</h2>
-  <p>このボタンを押すと、部屋の色が少しだけ変わります。</p>
-  <button class="btn" id="secretBtn">秘密の部屋を開く　✦</button>
-</section>
+  <section class="secret fade-up" id="secret">
+    <div class="eyebrow" style="color: #666;">WARNING</div>
+    <h2 class="mincho" style="color: #555;">まだ帰らないの？</h2>
+    <p class="mincho" style="color: #444; margin-bottom: 40px;">この先は、推奨されません。</p>
+    <button class="btn" id="secretBtn">秘密の部屋を開く</button>
+  </section>
 </main>
 
-<footer class="footer">iPhone no Heya / PRIVATE ARCHIVE / 2026</footer>
-
+<!-- Modal -->
 <div class="modal" id="modal">
-  <button class="close" id="close" aria-label="閉じる">×</button>
+  <button class="close-modal" id="closeModal">×</button>
   <img id="modalImg" src="" alt="">
 </div>
 
 <script>
-function updateClock(){
-  const now=new Date();
-  const pad=n=>String(n).padStart(2,"0");
-  document.getElementById("time").textContent=
-    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  document.getElementById("date").textContent=
-    `${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
-}
-setInterval(updateClock,1000); updateClock();
+// --- Custom Cursor & Ripple ---
+const cursorDot = document.getElementById('cursor-dot');
+const cursorOutline = document.getElementById('cursor-outline');
 
-const modal=document.getElementById("modal"), modalImg=document.getElementById("modalImg");
-document.querySelectorAll(".gallery figure img").forEach(img=>{
-  img.addEventListener("click",()=>{
-    modalImg.src=img.src; modalImg.alt=img.alt; modal.classList.add("open");
+window.addEventListener('mousemove', (e) => {
+  cursorDot.style.left = `${e.clientX}px`;
+  cursorDot.style.top = `${e.clientY}px`;
+  
+  // アウトラインは少し遅れて追従
+  cursorOutline.animate({
+    left: `${e.clientX}px`,
+    top: `${e.clientY}px`
+  }, { duration: 500, fill: "forwards" });
+});
+
+document.querySelectorAll('a, button, .zoomable').forEach(el => {
+  el.addEventListener('mouseenter', () => cursorOutline.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
+});
+
+window.addEventListener('click', (e) => {
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  ripple.style.left = `${e.clientX}px`;
+  ripple.style.top = `${e.clientY}px`;
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+});
+
+
+// --- Glitch Clock ---
+const clockEl = document.getElementById('clock');
+const dateEl = document.getElementById('date');
+const glitchChars = '!<>-_\\/[]{}—=+*^?#________';
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const ms = String(now.getMilliseconds()).padStart(3, '0');
+  
+  // たまに文字化けさせる
+  if (Math.random() < 0.05) {
+      let glitched = '';
+      for(let i=0; i<12; i++) {
+          glitched += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+      }
+      clockEl.textContent = glitched;
+      clockEl.style.color = '#ff003c';
+  } else {
+      clockEl.textContent = `${h}:${m}:${s}:${ms}`;
+      clockEl.style.color = 'var(--accent)';
+  }
+
+  dateEl.textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  requestAnimationFrame(updateClock);
+}
+requestAnimationFrame(updateClock);
+
+
+// --- Scroll Animations (Fade Up & Typing) ---
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      
+      // タイピングアニメーションのトリガー
+      const typeEls = entry.target.querySelectorAll('.type-text');
+      typeEls.forEach(el => {
+        if (!el.classList.contains('typed')) {
+          el.classList.add('typed');
+          typeWriter(el, el.getAttribute('data-text'), 0);
+        }
+      });
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+function typeWriter(element, text, i) {
+  if (i < text.length) {
+    element.innerHTML += text.charAt(i);
+    let speed = Math.random() * 50 + 20; // タイピング速度の揺らぎ
+    setTimeout(() => typeWriter(element, text, i + 1), speed);
+  }
+}
+
+
+// --- Image Modal ---
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
+const closeModal = document.getElementById('closeModal');
+
+document.querySelectorAll('.zoomable').forEach(img => {
+  img.addEventListener('click', () => {
+    modalImg.src = img.src;
+    modal.classList.add('open');
   });
 });
-function closeModal(){modal.classList.remove("open");modalImg.src=""}
-document.getElementById("close").addEventListener("click",closeModal);
-modal.addEventListener("click",e=>{if(e.target===modal)closeModal()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+closeModal.addEventListener('click', () => modal.classList.remove('open'));
+modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('open'); });
 
-document.getElementById("secretBtn").addEventListener("click",()=>{
-  document.body.classList.toggle("secret-mode");
-  document.getElementById("secretBtn").textContent =
-    document.body.classList.contains("secret-mode") ? "秘密を閉じる　×" : "秘密の部屋を開く　✦";
+
+// --- Insane Mode (Secret) ---
+const secretBtn = document.getElementById('secretBtn');
+let isInsane = false;
+let rainInterval;
+const creepyWords = ["逃がさない", "ずっと一緒", "見てるよ", "痛い", "どこへ行くの？", "iPhone", "壊れた", "エラー", "見つけた"];
+
+secretBtn.addEventListener('click', () => {
+  isInsane = !isInsane;
+  if (isInsane) {
+    document.body.classList.add('insane-mode');
+    secretBtn.textContent = "もう遅い";
+    document.querySelector('.kicker').textContent = "SYSTEM: FATAL ERROR";
+    startWordRain();
+  } else {
+    document.body.classList.remove('insane-mode');
+    secretBtn.textContent = "秘密の部屋を開く";
+    document.querySelector('.kicker').textContent = "SYSTEM: ONLINE / STATUS: UNSTABLE";
+    clearInterval(rainInterval);
+    document.querySelectorAll('.falling-text').forEach(el => el.remove());
+  }
 });
+
+function startWordRain() {
+  rainInterval = setInterval(() => {
+    const word = document.createElement('div');
+    word.className = 'falling-text';
+    word.textContent = creepyWords[Math.floor(Math.random() * creepyWords.length)];
+    word.style.left = `${Math.random() * 100}vw`;
+    word.style.top = `-50px`;
+    word.style.animationDuration = `${Math.random() * 2 + 2}s`;
+    word.style.opacity = Math.random() * 0.5 + 0.1;
+    word.style.fontSize = `${Math.random() * 30 + 10}px`;
+    document.body.appendChild(word);
+    
+    // アニメーションが終わったら消す
+    setTimeout(() => { word.remove(); }, 5000);
+  }, 100);
+}
+
+// 偶発的な画面ノイズ
+setInterval(() => {
+    if(isInsane && Math.random() < 0.3) {
+        document.body.style.filter = `invert(${Math.random()}) hue-rotate(${Math.random()*360}deg)`;
+        setTimeout(() => { document.body.style.filter = 'none'; }, 100);
+    }
+}, 500);
+
 </script>
 </body>
 </html>
+
