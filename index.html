@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>iPhone_room // PRIVATE ARCHIVE</title>
+<style>
+:root{--bg:#050609;--panel:#0b0d12;--panel2:#10131a;--line:#252936;--text:#d9dbe4;--muted:#7d8190;--accent:#a78bfa;--danger:#ff3157;--cyan:#74e7ff;--shadow:0 20px 70px #000b}
+*{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 50% -10%,#171124 0,#06070b 38%,#030406 100%);color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;min-height:100%;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.08;background-image:repeating-linear-gradient(0deg,transparent 0 3px,#fff 4px),radial-gradient(#fff 0.6px,transparent .7px);background-size:100% 4px,7px 7px;mix-blend-mode:screen;z-index:100}
+button,input{font:inherit}button{cursor:pointer}
+a{color:inherit}.hide{display:none!important}
+#boot{position:fixed;inset:0;background:#020205;z-index:9999;display:grid;place-items:center;padding:24px;transition:.6s}
+.bootbox{width:min(720px,100%);border:1px solid #272a36;background:#08090d;padding:26px;box-shadow:0 0 80px #000}
+.kicker{color:var(--accent);font-size:11px;letter-spacing:.18em}.bootbox h1{font-size:clamp(30px,8vw,72px);margin:12px 0 4px}.bootbox p{color:#777b88;line-height:1.8}
+.tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.track{border:1px solid #252936;background:#0c0e14;color:#c8cad4;text-align:left;padding:12px;min-height:78px}.track small{display:block;color:#686d7c;margin-top:7px}.track.active{border-color:var(--accent);box-shadow:inset 0 0 30px #8b5cf620}
+.primary{background:#d8d8e2;color:#08090d;border:0;padding:13px 18px;font-weight:800}.secondary{background:#10131a;border:1px solid #2a2e3b;color:#c9cbd5;padding:11px 15px}
+#app{display:none}.top{position:sticky;top:0;z-index:50;background:#06070bd9;backdrop-filter:blur(16px);border-bottom:1px solid #1d2029}.bar{max-width:1200px;margin:auto;display:flex;gap:10px;align-items:center;padding:11px 16px}.brand{font-weight:900;letter-spacing:.08em}.status{margin-left:auto;color:#707583;font-size:11px}.nav{display:flex;gap:6px;overflow:auto}.nav button{white-space:nowrap;background:transparent;border:1px solid transparent;color:#777b88;padding:8px 10px}.nav button.active,.nav button:hover{color:#eee;border-color:#2b2f3b;background:#0d0f15}
+main{max-width:1200px;margin:auto;padding:18px 16px 100px}.hero{min-height:58vh;display:grid;align-items:end;padding:28px 0;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,#050609 96%);pointer-events:none}.heroimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.33;filter:contrast(1.15) saturate(.75) brightness(.55);mask-image:linear-gradient(#000 20%,transparent 100%)}.heroText{position:relative;z-index:1;max-width:850px}.hero h2{font-size:clamp(36px,9vw,90px);line-height:.9;margin:8px 0}.hero p{color:#8a8e9d;max-width:680px;line-height:1.8}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.card{grid-column:span 4;background:linear-gradient(145deg,#0b0d12,#080a0f);border:1px solid #1e222c;box-shadow:var(--shadow);padding:16px;min-height:150px}.card.wide{grid-column:span 8}.card.full{grid-column:1/-1}.title{display:flex;justify-content:space-between;gap:10px;align-items:center}.title h3{margin:0;font-size:14px}.muted{color:var(--muted);font-size:11px;line-height:1.7}.meter{height:7px;background:#171a22;border:1px solid #252936;margin:9px 0;overflow:hidden}.meter i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#6d28d9,var(--accent));transition:.3s}.controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.danger{border-color:#5c1d2b!important;color:#ff7a91!important}.tiny{font-size:10px;padding:7px 9px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.gallery img{width:100%;height:220px;object-fit:cover;display:block;border:1px solid #222631;filter:brightness(.72) contrast(1.1);transition:.25s;cursor:zoom-in}.gallery img:hover{filter:brightness(.95) contrast(1.1);transform:translateY(-2px)}
+#lightbox{position:fixed;inset:0;background:#000e;z-index:200;display:none;place-items:center;padding:20px}.lbimg{max-width:96vw;max-height:90vh;object-fit:contain;border:1px solid #3a3d49;box-shadow:0 0 100px #000}.close{position:absolute;top:18px;right:18px}
+#musicDrawer{position:fixed;right:14px;bottom:14px;width:min(420px,calc(100vw - 28px));background:#080a0fdd;border:1px solid #2a2e39;backdrop-filter:blur(18px);z-index:80;padding:14px;box-shadow:0 20px 80px #000}.musicRow{display:flex;gap:7px;align-items:center}.musicRow select{flex:1;background:#0e1118;color:#ddd;border:1px solid #292d38;padding:10px}.vol{width:100%}
+#panic{position:fixed;left:14px;bottom:14px;z-index:90;background:#1a080d;color:#ff8ba0;border:1px solid #8b1d37;padding:12px 14px;font-weight:900;box-shadow:0 0 30px #ff315720}
+#panic span{display:block;font-size:9px;color:#9b5362;margin-top:3px}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:300;background:#080a0f;border:1px solid #373b47;padding:10px 15px;opacity:0;pointer-events:none;transition:.25s}.show{opacity:1!important}
+#glitch,#red,#blackout{position:fixed;inset:0;pointer-events:none;z-index:120}.glitching{animation:shake .07s infinite}.glitching #glitch{display:block;background:repeating-linear-gradient(0deg,transparent 0 5px,#f0f 6px 7px,#0ff 8px 9px);opacity:.06;mix-blend-mode:screen}.glitching #red{display:block;background:radial-gradient(circle,#f00 0,transparent 60%);opacity:.08}.blackout #blackout{display:block;background:#000;opacity:.96}
+@keyframes shake{0%{transform:translate(0)}25%{transform:translate(3px,-2px)}50%{transform:translate(-2px,2px)}75%{transform:translate(2px,1px)}100%{transform:translate(0)}}
+.log{height:150px;overflow:auto;background:#040507;border:1px solid #1d2028;padding:10px;font-size:10px;line-height:1.8;color:#777b87}.log b{color:#aaa}
+textarea{width:100%;min-height:130px;background:#05070b;border:1px solid #252936;color:#cfd1da;padding:10px;resize:vertical}
+table{width:100%;border-collapse:collapse;font-size:10px}td,th{padding:8px;border-bottom:1px solid #1c2028;text-align:left}th{color:#777b88}
+@media(max-width:800px){.tracks{grid-template-columns:1fr}.card,.card.wide{grid-column:1/-1}.gallery{grid-template-columns:1fr 1fr}.gallery img{height:180px}.hero{min-height:52vh}.status{display:none}}
+</style>
+</head>
+<body>
+<div id="glitch" class="hide"></div><div id="red" class="hide"></div><div id="blackout" class="hide"></div>
+<section id="boot">
+ <div class="bootbox">
+  <div class="kicker">PRIVATE ARCHIVE // ACCESS GATE</div>
+  <h1>iPhone_room</h1>
+  <p>ここから先は記録されます。入室前に音を選択してください。<br>※ブラウザの仕様上、音はこのボタンを押した後に再生されます。</p>
+  <div class="tracks" id="bootTracks"></div>
+  <button class="primary" id="enter">ENTER THE ROOM</button>
+  <p class="muted">前回の状態は自動保存されます。異常時は画面左下の <b>EMERGENCY RESET</b> を押してください。</p>
+ </div>
+</section>
+
+<div id="app">
+<header class="top">
+ <div class="bar">
+  <div class="brand">iPhone_room</div><div class="status" id="clock">--:--:--</div>
+ </div>
+ <div class="bar nav">
+  <button class="active" data-view="home">HOME</button><button data-view="archive">ARCHIVE</button><button data-view="terminal">TERMINAL</button><button data-view="diary">DIARY</button><button data-view="monitor">MONITOR</button>
+ </div>
+</header>
+
+<main>
+<section id="home" class="view">
+ <div class="hero">
+  <img class="heroimg" src="room-01.png">
+  <div class="heroText"><div class="kicker">ROOM STATUS: <span id="roomStatus">NORMAL</span></div><h2>WELCOME<br>BACK.</h2><p>ここは「iPhone」の部屋。画像、記録、音、異常ログを保管しています。何かを見つけても、見なかったことにはできません。</p></div>
+ </div>
+ <div class="grid">
+  <article class="card">
+   <div class="title"><h3>SANITY</h3><span id="sanNum">100%</span></div><div class="meter"><i id="sanBar"></i></div>
+   <div class="muted" id="sanText">安定しています。</div>
+   <div class="controls"><button class="secondary tiny" id="trigger">刺激を与える</button><button class="secondary tiny" id="resetMini">即時正常化</button></div>
+  </article>
+  <article class="card">
+   <div class="title"><h3>ROOM TIME</h3><span id="sessionTime">00:00</span></div>
+   <div class="muted">入室してからの経過時間。時計が止まっても、これは止まりません。</div>
+   <div class="controls"><button class="secondary tiny" id="blackoutBtn">BLACKOUT</button><button class="secondary tiny" id="pulseBtn">PULSE</button></div>
+  </article>
+  <article class="card">
+   <div class="title"><h3>MUSIC CORE</h3><span id="musicName">OFFLINE</span></div>
+   <div class="muted">入室後でも変更できます。再生位置も保存します。</div>
+   <div class="controls"><button class="secondary tiny" id="openMusic">音楽を開く</button><button class="secondary tiny" id="muteBtn">MUTE</button></div>
+  </article>
+  <article class="card wide">
+   <div class="title"><h3>ANOMALY LOG</h3><button class="secondary tiny" id="clearLog">CLEAR</button></div>
+   <div class="log" id="log"></div>
+  </article>
+  <article class="card">
+   <div class="title"><h3>QUICK RESET</h3></div>
+   <p class="muted">発狂状態を解除して、演出・SAN・タイマー・表示・音量を一括で正常化します。</p>
+   <button class="secondary tiny danger" id="resetAll">NORMALIZE EVERYTHING</button>
+  </article>
+ </div>
+</section>
+
+<section id="archive" class="view hide">
+ <div class="card full"><div class="title"><h3>IMAGE ARCHIVE // 07 FILES</h3><span class="muted">click to inspect</span></div>
+ <div class="gallery">
+  <img src="room-01.png"><img src="room-02.png"><img src="kafu-01.png"><img src="1000000273.png"><img src="1000000234.jpg"><img src="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png"><img src="1000000278.png">
+ </div></div>
+</section>
+
+<section id="terminal" class="view hide">
+ <div class="grid">
+  <article class="card wide"><div class="title"><h3>LOCAL TERMINAL</h3><span class="muted">NO NETWORK REQUIRED</span></div>
+   <div class="log" id="termOut"></div>
+   <div class="controls"><input id="termIn" placeholder="type: help" style="flex:1;background:#05070b;border:1px solid #252936;color:#ddd;padding:10px"><button class="secondary tiny" id="termSend">EXECUTE</button></div>
+  </article>
+  <article class="card"><h3>COMMANDS</h3><p class="muted">help / status / music / clear / panic / reset / who</p></article>
+ </div>
+</section>
+
+<section id="diary" class="view hide">
+ <div class="card full"><div class="title"><h3>PERSONAL DIARY</h3><button class="secondary tiny" id="saveDiary">SAVE</button></div>
+  <p class="muted">このメモはこの端末のブラウザにだけ保存されます。</p><textarea id="diaryText" placeholder="ここに記録を残す……"></textarea>
+ </div>
+</section>
+
+<section id="monitor" class="view hide">
+ <div class="grid">
+  <article class="card wide"><div class="title"><h3>MONITORING FEED</h3><span id="camState">CAM-01 ONLINE</span></div>
+   <div style="position:relative;overflow:hidden;border:1px solid #242833;margin-top:10px"><img src="room-02.png" style="width:100%;display:block;filter:brightness(.45) contrast(1.25) grayscale(.25)"><div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 4px,#fff1 5px),radial-gradient(circle at 70% 30%,transparent 0 15%,#0009 70%);"></div><div style="position:absolute;top:10px;left:10px;color:#8df">CAM-01 // 23:57:39</div></div>
+  </article>
+  <article class="card"><h3>FEED DATA</h3><table><tr><th>Signal</th><td id="sig">Stable</td></tr><tr><th>Noise</th><td id="noise">12%</td></tr><tr><th>Presence</th><td id="presence">None</td></tr></table></article>
+ </div>
+</section>
+</main>
+
+<div id="musicDrawer">
+ <div class="title"><h3>MUSIC PLAYER</h3><button class="secondary tiny" id="closeMusic">×</button></div>
+ <div class="musicRow" style="margin-top:10px"><select id="musicSelect"></select><button class="secondary tiny" id="playPause">PLAY</button></div>
+ <input class="vol" id="volume" type="range" min="0" max="1" step=".01" value=".42">
+ <div class="muted" id="musicMeta">Select a track. Audio begins after a user action.</div>
+ <audio id="audio" preload="auto"></audio>
+</div>
+
+<button id="panic">EMERGENCY RESET<span>tap = instant normalize</span></button>
+<div id="toast"></div>
+<div id="lightbox"><button class="secondary close" id="lbClose">CLOSE</button><img class="lbimg" id="lbImg"></div>
+</div>
+
+<script>
+const TRACKS=[
+ ['BLACK ROOM','music_black_room.wav','2:30','low drone / impact'],
+ ['CORRUPTED SIGNAL','music_corrupted_signal.wav','2:30','glitch / static'],
+ ['SLEEPLESS','music_sleepless.wav','2:30','pulse / dark motif'],
+ ['EMPTY HALL','music_empty_hall.wav','2:30','echo / wind'],
+ ['WATCHING','music_watching.wav','2:30','ring / ticking'],
+ ['THE LAST ROOM','music_last_room.wav','2:30','slow tension / bursts']
+];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let audio=$('#audio'), sanity=100, insane=false, timers=[], sessionStart=Date.now(), panicLock=false;
+let state=JSON.parse(localStorage.getItem('iphone_room_state')||'{}');
+const savedTrack=state.track||0;
+
+function toast(msg){let x=$('#toast');x.textContent=msg;x.classList.add('show');clearTimeout(x._t);x._t=setTimeout(()=>x.classList.remove('show'),1800)}
+function log(msg){let l=$('#log');let t=new Date().toLocaleTimeString('ja-JP');l.innerHTML+=`<div><b>[${t}]</b> ${msg}</div>`;l.scrollTop=l.scrollHeight;localStorage.setItem('iphone_room_log',l.innerHTML)}
+function bootTracks(){
+ $('#bootTracks').innerHTML=TRACKS.map((t,i)=>`<button class="track ${i===savedTrack?'active':''}" data-i="${i}"><b>${t[0]}</b><small>${t[2]} // ${t[3]}</small></button>`).join('');
+ $$('.track').forEach(b=>b.onclick=()=>{$$('.track').forEach(x=>x.classList.remove('active'));b.classList.add('active');selectMusic(+b.dataset.i,false)});
+}
+function fillMusic(){
+ $('#musicSelect').innerHTML=TRACKS.map((t,i)=>`<option value="${i}">${t[0]} // ${t[2]}</option>`).join('');
+ $('#musicSelect').value=savedTrack;
+}
+function selectMusic(i,autoplay=true){
+ i=Math.max(0,Math.min(TRACKS.length-1,i)); state.track=i; saveState();
+ audio.src=TRACKS[i][1]; $('#musicName').textContent=TRACKS[i][0]; $('#musicSelect').value=i;
+ $('#musicMeta').textContent=`${TRACKS[i][2]} // ${TRACKS[i][3]}`;
+ if(autoplay) audio.play().then(()=>{$('#playPause').textContent='PAUSE';toast('音楽を変更しました')}).catch(()=>toast('PLAYを押すと再生します'));
+}
+function saveState(){localStorage.setItem('iphone_room_state',JSON.stringify(state))}
+function setSan(v,reason=''){sanity=Math.max(0,Math.min(100,v));$('#sanNum').textContent=sanity+'%';$('#sanBar').style.width=sanity+'%';$('#sanText').textContent=sanity>75?'安定しています。':sanity>45?'少し不安定です。':sanity>15?'何かが近い。':'正常ではありません。';if(reason)log(reason)}
+function addTimer(fn,ms){let id=setTimeout(fn,ms);timers.push(id);return id}
+function interval(fn,ms){let id=setInterval(fn,ms);timers.push(id);return id}
+
+function enterRoom(){
+ $('#boot').style.opacity=0; setTimeout(()=>$('#boot').remove(),650); $('#app').style.display='block';
+ sessionStart=Date.now(); selectMusic(state.track||0,true); log('ACCESS GRANTED // room session started'); loadDiary(); loadLog();
+}
+function triggerInsanity(){
+ if(insane)return; insane=true; $('#roomStatus').textContent='UNSTABLE'; document.body.classList.add('glitching'); $('#glitch').classList.remove('hide'); $('#red').classList.remove('hide'); log('ANOMALY: panic sequence initiated');
+ setSan(28,'SANITY DROP // 100 → 28');
+ addTimer(()=>{if(insane)setSan(7,'ANOMALY: visual field corrupted')},1300);
+ addTimer(()=>{if(insane){document.body.classList.add('blackout');log('BLACKOUT // emergency state')}},3300);
+ addTimer(()=>{if(insane){document.body.classList.remove('blackout');toast('……見つけた');}},5200);
+ interval(()=>{if(insane) setSan(sanity-1)},900);
+}
+function resetAll(){
+ if(panicLock)return; panicLock=true;
+ timers.forEach(clearTimeout); timers.forEach(clearInterval); timers=[];
+ insane=false; sanity=100; document.body.classList.remove('glitching','blackout'); $('#glitch').classList.add('hide');$('#red').classList.add('hide');$('#blackout').classList.add('hide');
+ $('#roomStatus').textContent='NORMAL'; $('#sig').textContent='Stable';$('#noise').textContent='12%';$('#presence').textContent='None';
+ audio.pause(); audio.currentTime=0; audio.volume=parseFloat($('#volume').value); $('#playPause').textContent='PLAY';
+ setSan(100,'SYSTEM NORMALIZED // all anomaly processes terminated');
+ toast('✓ 発狂モードを完全解除しました'); setTimeout(()=>panicLock=false,250);
+}
+function showView(v){$$('.view').forEach(x=>x.classList.add('hide'));$('#'+v).classList.remove('hide');$$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));}
+function loadLog(){let l=localStorage.getItem('iphone_room_log');if(l)$('#log').innerHTML=l}
+function loadDiary(){$('#diaryText').value=localStorage.getItem('iphone_room_diary')||''}
+function tick(){let d=Math.floor((Date.now()-sessionStart)/1000);$('#sessionTime').textContent=String(Math.floor(d/60)).padStart(2,'0')+':'+String(d%60).padStart(2,'0');$('#clock').textContent=new Date().toLocaleTimeString('ja-JP')}
+function term(cmd){
+ cmd=cmd.trim().toLowerCase(); let out=$('#termOut'); let r='';
+ if(cmd==='help')r='help / status / music / clear / panic / reset / who'
+ else if(cmd==='status')r=`SAN=${sanity}% // MODE=${insane?'UNSTABLE':'NORMAL'} // TRACK=${TRACKS[state.track||0][0]}`
+ else if(cmd==='music'){$('#musicDrawer').style.display='block';r='music player opened'}
+ else if(cmd==='clear'){out.innerHTML='';r='terminal cleared'}
+ else if(cmd==='panic'){triggerInsanity();r='panic sequence started'}
+ else if(cmd==='reset'){resetAll();r='system normalized'}
+ else if(cmd==='who')r='iPhone_room // visitor unknown'
+ else r='command not found';
+ out.innerHTML+=`<div>> ${cmd}</div><div style="color:#9ca1ae">${r}</div>`;out.scrollTop=out.scrollHeight
+}
+bootTracks(); fillMusic();
+$('#enter').onclick=enterRoom;
+$('#musicSelect').onchange=e=>selectMusic(+e.target.value,true);
+$('#playPause').onclick=()=>{if(audio.paused)audio.play().then(()=>$('#playPause').textContent='PAUSE');else{audio.pause();$('#playPause').textContent='PLAY'}};
+$('#volume').oninput=e=>{audio.volume=+e.target.value};
+$('#muteBtn').onclick=()=>{audio.muted=!audio.muted;$('#muteBtn').textContent=audio.muted?'UNMUTE':'MUTE'};
+$('#openMusic').onclick=()=>$('#musicDrawer').style.display='block';$('#closeMusic').onclick=()=>$('#musicDrawer').style.display='none';
+$('#panic').onclick=resetAll;$('#resetAll').onclick=resetAll;$('#resetMini').onclick=resetAll;
+$('#trigger').onclick=triggerInsanity;
+$('#blackoutBtn').onclick=()=>{document.body.classList.toggle('blackout');log('BLACKOUT toggled');};
+$('#pulseBtn').onclick=()=>{document.body.animate([{filter:'brightness(1)'},{filter:'brightness(1.8)'},{filter:'brightness(1)'}],{duration:550});toast('PULSE')}
+$('#clearLog').onclick=()=>{$('#log').innerHTML='';localStorage.removeItem('iphone_room_log')};
+$$('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+$$('.gallery img').forEach(img=>img.onclick=()=>{$('#lbImg').src=img.src;$('#lightbox').style.display='grid'});
+$('#lbClose').onclick=()=>$('#lightbox').style.display='none';$('#lightbox').onclick=e=>{if(e.target.id==='lightbox')e.currentTarget.style.display='none'};
+$('#saveDiary').onclick=()=>{localStorage.setItem('iphone_room_diary',$('#diaryText').value);toast('記録を保存しました')};
+$('#termSend').onclick=()=>{term($('#termIn').value);$('#termIn').value=''};$('#termIn').onkeydown=e=>{if(e.key==='Enter'){$('#termSend').click()}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key.toLowerCase()==='r')resetAll()});
+interval(tick,1000);
+audio.addEventListener('ended',()=>{audio.currentTime=0;audio.play().catch(()=>{})});
+audio.volume=.42;
+</script>
+</body>
+</html>
