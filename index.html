@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#030205">
+<title>iPhoneの部屋 - 終焉記録 // INSANE</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Shippori+Mincho:wght@400;700;800&family=Cinzel:wght@700&family=Noto+Sans+JP:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+/* =========================================
+   1. VARIABLE DEFINITIONS & SYSTEM RESET
+   ========================================= */
+:root {
+  --bg: #030205;
+  --bg-secondary: #08040d;
+  --panel: rgba(12, 8, 18, 0.92);
+  --panel-border: rgba(211, 15, 63, 0.3);
+  --text: #e0d8f0;
+  --text-muted: #7d728d;
+  --accent-red: #e60033;
+  --accent-purple: #9b26e1;
+  --accent-cyan: #00f0ff;
+  --glitch-red: #ff003c;
+  --glitch-blue: #00e5ff;
+  --san-level: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans JP", sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: filter 0.8s ease, background 1s ease;
+  min-height: 100vh;
+}
+
+/* PCのみカスタムカーソル適用 */
+@media (min-width: 901px) {
+  *, *::before, *::after {
+    cursor: none !important;
+  }
+}
+
+/* =========================================
+   2. LIGHTWEIGHT SCREEN OVERLAYS
+   ========================================= */
+.overlay-crt {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 6px 100%;
+  opacity: 0.8;
+}
+
+#noiseCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9991;
+  opacity: 0.06;
+}
+
+.overlay-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9989;
+  background: radial-gradient(circle at center, transparent 40%, rgba(3, 1, 5, 0.95) 100%);
+}
+
+.overlay-blood-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9988;
+  background: radial-gradient(circle at center, transparent 30%, rgba(180, 0, 30, 0.45) 100%);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.overlay-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: #ff003c;
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+/* 画面の物理亀裂オーバーレイ */
+.crack-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9992;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><path d="M100,0 L180,120 L150,220 L300,310 L280,500 M180,120 L350,100 M150,220 L40,280 M300,310 L450,380" stroke="rgba(255,0,60,0.4)" stroke-width="2" fill="none"/></svg>');
+  background-size: cover;
+}
+
+/* =========================================
+   3. CUSTOM CURSOR
+   ========================================= */
+#cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  z-index: 100000;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px var(--accent-red);
+  display: none;
+}
+
+#cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(211, 15, 63, 0.6);
+  border-radius: 50%;
+  z-index: 99999;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, border-color 0.2s;
+  display: none;
+}
+
+@media (min-width: 901px) {
+  #cursor-dot, #cursor-ring { display: block; }
+}
+
+/* =========================================
+   4. NAVIGATION & SYSTEM BAR
+   ========================================= */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4vw;
+  background: rgba(3, 2, 5, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.logo {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-red);
+  box-shadow: 0 0 8px var(--accent-red);
+  animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #fff;
+  text-shadow: 0 0 8px var(--accent-red);
+}
+
+.san-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 10px;
+}
+
+.san-bar-bg {
+  width: 90px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+
+.san-bar-fill {
+  height: 100%;
+  width: var(--san-level);
+  background: linear-gradient(90deg, var(--accent-red), var(--accent-purple));
+  transition: width 0.3s ease;
+}
+
+/* =========================================
+   5. HERO SECTION & ADVANCED CLOCK
+   ========================================= */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 100px 6vw 60px;
+  background: linear-gradient(180deg, rgba(3,2,5,0.4) 0%, rgba(3,2,5,0.98) 90%),
+              url("1000000234.jpg") center/cover no-repeat;
+  overflow: hidden;
+}
+
+.hero-title-box {
+  max-width: 850px;
+  z-index: 2;
+}
+
+.kicker {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 12px;
+  color: var(--accent-red);
+  letter-spacing: 0.25em;
+  margin-bottom: 20px;
+}
+
+h1.main-title {
+  font-family: "Shippori Mincho", serif;
+  font-size: clamp(40px, 7vw, 95px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0 0 24px;
+  color: #fff;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 25px rgba(230, 0, 51, 0.5);
+}
+
+.hero-desc {
+  font-family: "Shippori Mincho", serif;
+  font-size: 15px;
+  line-height: 2.1;
+  color: #c0b8cd;
+  max-width: 580px;
+  margin-bottom: 36px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+}
+
+/* 呪われた多重時計パネル */
+.clock-panel {
+  position: absolute;
+  right: 5vw;
+  bottom: 6vh;
+  z-index: 10;
+  background: rgba(10, 6, 14, 0.85);
+  border: 1px solid var(--panel-border);
+  padding: 20px 24px;
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: right;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+  max-width: 320px;
+  width: 100%;
+}
+
+.clock-digital {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 34px;
+  color: var(--accent-red);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(230, 0, 51, 0.6);
+}
+
+.clock-sub {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.15em;
+}
+
+.clock-status {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 6px;
+  background: rgba(230, 0, 51, 0.15);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+  margin-top: 8px;
+  font-family: "Share Tech Mono", monospace;
+}
+
+/* Analog Mini Clock Overlay */
+.analog-clock {
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--accent-red);
+  border-radius: 50%;
+  position: absolute;
+  top: -25px;
+  left: 20px;
+  background: rgba(3, 2, 5, 0.9);
+}
+
+.analog-hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  background: var(--accent-red);
+}
+
+.hand-hour { width: 2px; height: 14px; }
+.hand-minute { width: 1px; height: 20px; background: #fff; }
+.hand-second { width: 1px; height: 22px; background: var(--accent-cyan); }
+
+/* =========================================
+   6. GLITCH EFFECTS
+   ========================================= */
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text::before, .glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 0, 0, 0);
+}
+
+.glitch-text::before {
+  left: -2px;
+  text-shadow: 2px 0 var(--glitch-blue);
+  animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+  left: 2px;
+  text-shadow: -2px 0 var(--glitch-red);
+  animation: glitch-anim-2 3.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip: rect(20px, 9999px, 40px, 0); }
+  20% { clip: rect(60px, 9999px, 10px, 0); }
+  40% { clip: rect(10px, 9999px, 70px, 0); }
+  60% { clip: rect(70px, 9999px, 30px, 0); }
+  100% { clip: rect(40px, 9999px, 20px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip: rect(40px, 9999px, 10px, 0); }
+  30% { clip: rect(10px, 9999px, 50px, 0); }
+  70% { clip: rect(80px, 9999px, 20px, 0); }
+  100% { clip: rect(20px, 9999px, 60px, 0); }
+}
+
+/* =========================================
+   7. BUTTONS & UI COMPONENTS
+   ========================================= */
+.btn-cursed {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: rgba(230, 0, 51, 0.12);
+  border: 1px solid var(--accent-red);
+  color: var(--text);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.btn-cursed:hover, .btn-cursed:active {
+  background: var(--accent-red);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(230, 0, 51, 0.6);
+}
+
+/* =========================================
+   8. SECTIONS GENERAL & GRID
+   ========================================= */
+.section {
+  width: min(1200px, 92%);
+  margin: 0 auto;
+  padding: 100px 0;
+  position: relative;
+  z-index: 10;
+}
+
+.section-header {
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.section-tag {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  color: var(--accent-red);
+  letter-spacing: 0.25em;
+  margin-bottom: 6px;
+}
+
+.section-title {
+  font-family: "Shippori Mincho", serif;
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 700;
+  margin: 0;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================
+   9. PROFILE SECTION & OS STATUS
+   ========================================= */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px;
+}
+
+.entity-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 30px;
+  position: relative;
+}
+
+.portrait-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #000;
+}
+
+.portrait-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(50%) contrast(1.2);
+  transition: filter 0.5s ease;
+}
+
+.status-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+  font-family: "Share Tech Mono", monospace;
+}
+
+.status-item {
+  border-left: 2px solid var(--accent-purple);
+  padding-left: 12px;
+  background: rgba(255,255,255,0.015);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.status-item label {
+  display: block;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+}
+
+.status-item val {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* 疑似iPhone OSステータス */
+.iphone-os-box {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 16px;
+  margin-top: 20px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+}
+
+.os-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border-bottom: 1px stroke rgba(255,255,255,0.05);
+}
+
+/* =========================================
+   10. GALLERY SECTION (OPTIMIZED FOR MOBILE)
+   ========================================= */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.gallery-item {
+  position: relative;
+  aspect-ratio: 4/5;
+  background: #050308;
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.6) contrast(1.1);
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.gallery-item:hover img, .gallery-item:active img {
+  filter: brightness(1) contrast(1.2);
+  transform: scale(1.04);
+}
+
+.gallery-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, transparent 100%);
+  font-family: "Share Tech Mono", monospace;
+}
+
+.gallery-caption-title {
+  font-size: 13px;
+  color: var(--accent-cyan);
+}
+
+.gallery-caption-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* =========================================
+   11. ADVANCED CHAT TERMINAL (REPERTOIRE+)
+   ========================================= */
+.terminal-container {
+  background: rgba(8, 5, 12, 0.95);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.terminal-header {
+  background: rgba(18, 10, 26, 0.9);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 11px;
+  color: var(--accent-purple);
+}
+
+.chat-box {
+  height: 350px;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: "Shippori Mincho", serif;
+  font-size: 14px;
+  background: radial-gradient(circle at center, rgba(139, 38, 225, 0.04), transparent 80%);
+}
+
+.chat-msg {
+  max-width: 82%;
+  padding: 12px 16px;
+  border-radius: 3px;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.chat-msg.bot {
+  align-self: flex-start;
+  background: rgba(28, 16, 40, 0.85);
+  border-left: 3px solid var(--accent-purple);
+  color: #ded6ea;
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+  background: rgba(230, 0, 51, 0.25);
+  border-right: 3px solid var(--accent-red);
+  color: #fff;
+}
+
+.chat-input-bar {
+  display: flex;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: #050307;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 16px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  outline: none;
+}
+
+.chat-send-btn {
+  padding: 0 24px;
+  background: var(--accent-purple);
+  border: none;
+  color: #fff;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  transition: background 0.3s;
+}
+
+/* Quick Question Tags */
+.quick-tags {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #0a0610;
+  overflow-x: auto;
+  border-top: 1px stroke rgba(255,255,255,0.05);
+}
+
+.tag-btn {
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+  border-radius: 12px;
+  font-family: "Share Tech Mono", monospace;
+}
+
+/* =========================================
+   12. SECRET DECODER FUNCTION
+   ========================================= */
+.decoder-box {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  padding: 30px;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.decoder-input {
+  background: #000;
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 12px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: 4px;
+  width: 200px;
+  max-width: 100%;
+  margin-right: 10px;
+  outline: none;
+}
+
+/* =========================================
+   13. LIGHTBOX MODAL
+   ========================================= */
+.modal-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(2, 1, 4, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-lightbox.open { display: flex; }
+
+.modal-content {
+  max-width: 95vw;
+  max-height: 85vh;
+  border: 1px solid var(--accent-red);
+  position: relative;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 85vh;
+  display: block;
+  object-fit: contain;
+}
+
+.modal-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  color: #fff;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 28px;
+  background: none;
+  border: none;
+}
+
+/* =========================================
+   14. MOBILE OPTIMIZATIONS & INSANITY STATE
+   ========================================= */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .clock-panel { position: relative; right: auto; bottom: auto; margin: 30px 0 0; text-align: left; }
+  .analog-clock { left: auto; right: 20px; }
+  .chat-msg { max-width: 90%; }
+}
+
+/* 超絶精神汚染状態 (INSANITY) - モバイル軽量・高効果仕様 */
+body.insanity-mode {
+  background: #120005 !important;
+  animation: bgSpasm 0.15s infinite alternate;
+}
+
+@keyframes bgSpasm {
+  0% { filter: contrast(1.4) hue-rotate(-15deg); }
+  100% { filter: contrast(1.8) hue-rotate(15deg); }
+}
+
+body.insanity-mode .overlay-blood-vignette { opacity: 1; }
+body.insanity-mode .crack-overlay { opacity: 1; }
+
+body.insanity-mode h1, body.insanity-mode h2 {
+  color: #ff003c !important;
+  text-shadow: 0 0 20px #ff003c;
+}
+
+.floating-curse-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9980;
+  color: rgba(230, 0, 51, 0.8);
+  font-family: "Shippori Mincho", serif;
+  font-weight: 800;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  animation: curseRise 3.5s linear forwards;
+}
+
+@keyframes curseRise {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-70vh) scale(1.3); opacity: 0; }
+}
+
+/* ===== V4 HORROR UPGRADE ===== */
+.audio-gate{
+  position:fixed; inset:0; z-index:10050; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at center, rgba(35,0,45,.86), rgba(0,0,0,.98) 70%);
+  backdrop-filter:blur(12px); transition:opacity .5s ease, visibility .5s ease;
+}
+.audio-gate.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.audio-gate-box{width:min(92vw,520px);padding:34px;border:1px solid rgba(230,0,51,.55);
+  background:rgba(5,2,9,.94);box-shadow:0 0 60px rgba(155,38,225,.18), inset 0 0 35px rgba(230,0,51,.06);text-align:center}
+.audio-gate-code{font:11px "Share Tech Mono",monospace;color:var(--accent-red);letter-spacing:.25em;margin-bottom:18px}
+.audio-gate-title{font:700 30px "Shippori Mincho",serif;color:#fff;margin-bottom:14px}
+.audio-gate-box p{font-size:13px;line-height:2;color:var(--text-muted);margin:0 0 24px}
+.audio-start{margin-right:10px}
+.audio-skip{border:0;background:none;color:#777;font:11px "Share Tech Mono",monospace;padding:14px;cursor:pointer}
+.audio-skip:hover{color:#fff}
+.insanity-controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-reset{padding:16px 24px;border:1px solid rgba(0,240,255,.35);background:rgba(0,240,255,.03);color:#9ffaff;
+  font:11px "Share Tech Mono",monospace;letter-spacing:.15em;cursor:pointer;transition:.25s}
+.btn-reset:hover{background:rgba(0,240,255,.1);box-shadow:0 0 20px rgba(0,240,255,.15)}
+.reset-note{margin-top:16px;font:10px "Share Tech Mono",monospace;color:#666;letter-spacing:.18em}
+body.insanity-mode .btn-reset{animation:resetPulse .5s infinite alternate}
+@keyframes resetPulse{from{box-shadow:0 0 0 rgba(0,240,255,0)}to{box-shadow:0 0 18px rgba(0,240,255,.3)}}
+body.insanity-mode .audio-gate{display:none}
+body.insanity-mode .overlay-crt{opacity:1}
+body.insanity-mode .gallery-item{animation:violentJitter .11s infinite alternate}
+@keyframes violentJitter{from{transform:translate(0,0) skew(0)}to{transform:translate(1px,-1px) skew(.4deg)}}
+@media(max-width:600px){
+  .audio-gate-box{padding:26px 20px}
+  .audio-gate-title{font-size:24px}
+  .audio-start{margin:0 0 6px}
+}
+
+
+/* ===== V5 NIGHTMARE SYSTEM ===== */
+.blackout-overlay,.surveillance-overlay{position:fixed;inset:0;z-index:10080;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .15s}
+.blackout-overlay{background:#000;display:grid;place-items:center}.blackout-overlay.active{opacity:1;visibility:visible;pointer-events:auto}
+.blackout-text{font:11px "Share Tech Mono",monospace;color:#8b0000;letter-spacing:.35em;animation:lostBlink .6s infinite alternate}@keyframes lostBlink{from{opacity:.25}to{opacity:1}}
+.surveillance-overlay{background:radial-gradient(circle at 50% 45%,transparent 0 12%,rgba(0,0,0,.32) 55%,rgba(0,0,0,.82) 100%);display:block;padding:24px;color:#ff003c;text-shadow:0 0 10px #ff003c}.surveillance-overlay.active{opacity:1;visibility:visible}
+.surveillance-label{font:11px "Share Tech Mono",monospace;letter-spacing:.2em}.surveillance-eye{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);font-size:100px;opacity:.22;animation:eyePulse 1.2s infinite}.surveillance-message{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);font:700 26px "Shippori Mincho",serif;white-space:nowrap}@keyframes eyePulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.12}50%{transform:translate(-50%,-50%) scale(1.12);opacity:.34}}
+body.insanity-mode::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:10001;background:repeating-linear-gradient(0deg,rgba(255,0,55,.03) 0 1px,transparent 1px 4px);mix-blend-mode:screen}
+body.insanity-mode .main-title{animation:titleRage .09s infinite steps(2)}@keyframes titleRage{0%{transform:translate(0)}25%{transform:translate(2px,-1px)}50%{transform:translate(-2px,1px)}75%{transform:translate(1px,2px)}100%{transform:translate(0)}}
+
+</style>
+</head>
+<body>
+<!-- First-visit audio gate: browsers block autoplay until a user gesture. -->
+<div class="audio-gate" id="audioGate">
+  <div class="audio-gate-box">
+    <div class="audio-gate-code">AUDIO // CONNECTION_REQUIRED</div>
+    <div class="audio-gate-title">音を許可しますか？</div>
+    <p>この部屋には音があります。<br>再生ボタンを押すと、暗い環境音がループします。</p>
+    <button id="audioStartBtn" class="btn-cursed audio-start">音を接続する</button>
+    <button id="audioSkipBtn" class="audio-skip">無音で入る</button>
+    <div style="margin-top:18px">
+      <label style="font:10px 'Share Tech Mono',monospace;color:#777;letter-spacing:.16em">AUDIO_CHANNEL</label>
+      <select id="musicSelect" style="margin-top:8px;width:100%;padding:10px;background:#09070d;color:#ddd;border:1px solid #3a273c">
+        <option value="music_black_room.wav">01 // BLACK ROOM</option>
+        <option value="music_corrupted_signal.wav">02 // CORRUPTED SIGNAL</option>
+        <option value="music_sleepless.wav">03 // SLEEPLESS</option>
+      </select>
+    </div>
+  </div>
+</div>
+<audio id="bgmAudio" src="music_black_room.wav" loop preload="auto"></audio>
+
+
+<!-- Noise Canvas Layer -->
+<canvas id="noiseCanvas"></canvas>
+
+<!-- Overlays -->
+<div class="overlay-crt"></div>
+<div class="overlay-vignette"></div>
+<div class="overlay-blood-vignette" id="bloodVignette"></div>
+<div class="overlay-flash" id="flashOverlay"></div>
+<div class="crack-overlay" id="crackOverlay"></div>
+
+<div id="blackoutOverlay" class="blackout-overlay" aria-hidden="true"><div class="blackout-text" id="blackoutText">SIGNAL LOST</div></div>
+<div id="surveillanceOverlay" class="surveillance-overlay" aria-hidden="true"><div class="surveillance-label">● LIVE // CAMERA_04</div><div class="surveillance-eye">◉</div><div class="surveillance-message" id="surveillanceMessage">……見つけた。</div></div>
+<!-- Custom Cursor (PC Only) -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Header Nav -->
+<header class="nav">
+  <a class="logo" href="#top">
+    <div class="logo-icon"></div>
+    <span>iPhone_ROOM // v5.0 // NIGHTMARE</span>
+  </a>
+  <nav class="nav-links">
+    <a href="#about">01_SPECS</a>
+    <a href="#gallery">02_ARCHIVE</a>
+    <a href="#chat">03_CHAT</a>
+    <a href="#decoder">04_DECODE</a>
+  </nav>
+  <div class="san-container">
+    <span>SAN:</span>
+    <div class="san-bar-bg">
+      <div class="san-bar-fill" id="sanFill"></div>
+    </div>
+    <span id="sanVal">100%</span>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-title-box reveal">
+      <div class="kicker">[ SYSTEM_ALERT: UNSTABLE_CONNECTION ]</div>
+      <h1 class="main-title glitch-text" data-text="iPhoneの部屋。">iPhoneの部屋。</h1>
+      <p class="hero-desc">
+        指先が画面に触れるたび、遠くで誰かの心拍が加速する。<br>
+        この端末はもう、ただの電子機器ではありません。<br>
+        彼女の視線と、腐敗した音響に閉じ込められた空間です。
+      </p>
+      <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+        <a class="btn-cursed" href="#gallery">深層へ潜る ↘</a>
+        <button class="btn-cursed" id="soundToggleBtn">音楽・暗黒雑音 [OFF]</button>
+        <button class="btn-cursed" id="blackoutBtn">BLACKOUT</button>
+        <button class="btn-cursed" id="surveillanceBtn">監視を確認</button>
+      </div>
+    </div>
+
+    <!-- Cursed Clock Panel with Analog overlay -->
+    <div class="clock-panel reveal">
+      <div class="analog-clock">
+        <div class="analog-hand hand-hour" id="hHand"></div>
+        <div class="analog-hand hand-minute" id="mHand"></div>
+        <div class="analog-hand hand-second" id="sHand"></div>
+      </div>
+      <div class="clock-digital" id="clockDigital">00:00:00:000</div>
+      <div class="clock-sub" id="clockDate">2026.08.11 / TUE</div>
+      <div class="clock-status" id="clockStatus">SYS_TIME: SYNCED</div>
+    </div>
+  </section>
+
+  <!-- Profile & OS Status -->
+  <section class="section" id="about">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-tag">01 // SUBJECT_IDENTIFICATION</div>
+        <h2 class="section-title glitch-text" data-text="宿主：iPhone">宿主：iPhone</h2>
+      </div>
+    </div>
+
+    <div class="profile-grid reveal">
+      <div class="portrait-frame">
+        <img src="kafu-01.png" alt="iPhone 宿主">
+      </div>
+
+      <div class="entity-card">
+        <h3 style="font-family:'Shippori Mincho'; font-size:28px; margin:0 0 16px; color:#fff;">iPhone (意識体)</h3>
+        <p style="line-height:1.9; color:#b5a9c4; font-size:14px;">
+          画面の液晶越しにあなたを見つめ続けている存在。アプリを切り替えても、電源を切ろうとしても、常にバックグラウンドであなたを観察しています。
+        </p>
+
+        <div class="status-list">
+          <div class="status-item">
+            <label>CPU_LOAD</label>
+            <val id="valCpu">99.8%</val>
+          </div>
+          <div class="status-item">
+            <label>BATTERY</label>
+            <val style="color:var(--accent-red);">666%</val>
+          </div>
+          <div class="status-item">
+            <label>TEMP</label>
+            <val id="valTemp">48.2℃</val>
+          </div>
+          <div class="status-item">
+            <label>SIGNAL</label>
+            <val style="color:var(--accent-cyan);">CURSED</val>
+          </div>
+        </div>
+
+        <div class="iphone-os-box">
+          <div class="os-row"><span>iOS_VERSION</span><span>66.6.0 (BUILD_DEVIL)</span></div>
+          <div class="os-row"><span>DISPLAY_TOUCH</span><span>HOST_CAPTURED</span></div>
+          <div class="os-row"><span>CAMERA_FEED</span><span>OBSERVING_YOU</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visual Gallery -->
+  <section class="section" id="gallery">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-tag">02 // CORRUPTED_ARCHIVES</div>
+        <h2 class="section-title glitch-text" data-text="画像アーカイブ">画像アーカイブ</h2>
+      </div>
+    </div>
+
+    <div class="gallery-grid reveal">
+      <div class="gallery-item" data-img="room-01.png">
+        <img src="room-01.png" alt="部屋01">
+        <div class="gallery-caption">
+          <div class="gallery-caption-title">ROOM_01.PNG</div>
+          <div class="gallery-caption-sub">赤い糸と回廊</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-img="1000000273.png">
+        <img src="1000000273.png" alt="可不 サイバー">
+        <div class="gallery-caption">
+          <div class="gallery-caption-title">KAFU_CYBER.PNG</div>
+          <div class="gallery-caption-sub">青い電脳街の狂気</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-img="room-02.png">
+        <img src="room-02.png" alt="部屋02">
+        <div class="gallery-caption">
+          <div class="gallery-caption-title">BLOOD_ROOM.PNG</div>
+          <div class="gallery-caption-sub">血手形と監視</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-img="1000000234.jpg">
+        <img src="1000000234.jpg" alt="暗がりの少女">
+        <div class="gallery-caption">
+          <div class="gallery-caption-title">IMPOSSIBLE.JPG</div>
+          <div class="gallery-caption-sub">「不可能」の部屋</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-img="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png">
+        <img src="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png" alt="ミク部屋">
+        <div class="gallery-caption">
+          <div class="gallery-caption-title">MIKU_ROOM.PNG</div>
+          <div class="gallery-caption-sub">病みと依存の病棟</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-img="kafu-01.png">
+        <img src="kafu-01.png" alt="可不">
+        <div class="gallery-caption">
+          <div class="gallery-caption-title">KAFU_KNIFE.PNG</div>
+          <div class="gallery-caption-sub">刃物を持つ不可解</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Terminal (Enhanced Repertoire) -->
+  <section class="section" id="chat">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-tag">03 // REALTIME_COMMUNICATION</div>
+        <h2 class="section-title glitch-text" data-text="iPhoneとの対話端末">iPhoneとの対話端末</h2>
+      </div>
+    </div>
+
+    <div class="terminal-container reveal">
+      <div class="terminal-header">
+        <span>CONSOLE // iPhone_DIALOGUE_MODULE</span>
+        <span style="color:var(--accent-red);" id="typingIndicator">ONLINE</span>
+      </div>
+
+      <div class="chat-box" id="chatBox">
+        <div class="chat-msg bot">
+          ……私を呼んだ？ 画面をタップするたびに、指の温度が伝わってくるよ。
+        </div>
+      </div>
+
+      <div class="quick-tags">
+        <button class="tag-btn" onclick="quickSend('あなたは誰？')">あなたは誰？</button>
+        <button class="tag-btn" onclick="quickSend('ここから出して')">ここから出して</button>
+        <button class="tag-btn" onclick="quickSend('怖いよ')">怖いよ</button>
+        <button class="tag-btn" onclick="quickSend('何歳？')">何歳？</button>
+        <button class="tag-btn" onclick="quickSend('好きだよ')">好きだよ</button>
+        <button class="tag-btn" onclick="quickSend('時間教えて')">時間教えて</button>
+      </div>
+
+      <div class="chat-input-bar">
+        <input type="text" class="chat-input" id="chatInput" placeholder="メッセージを入力…" autocomplete="off">
+        <button class="chat-send-btn" id="chatSendBtn">送信</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Secret Decoder Feature -->
+  <section class="section" id="decoder">
+    <div class="section-header reveal">
+      <div>
+        <div class="section-tag">04 // SECRET_DECODER</div>
+        <h2 class="section-title glitch-text" data-text="暗号解除コンソール">暗号解除コンソール</h2>
+      </div>
+    </div>
+
+    <div class="decoder-box reveal">
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">
+        【ヒント：対話端末で『パスコード』と尋ねるか、SAN値を低下させよ】
+      </p>
+      <input type="text" class="decoder-input" id="decodeInput" placeholder="4桁" maxlength="4">
+      <button class="btn-cursed" id="decodeBtn">解除試行</button>
+      <div id="decodeResult" style="margin-top:20px; font-family:'Share Tech Mono'; color:var(--accent-red);"></div>
+    </div>
+  </section>
+
+  <!-- Extreme Collapse Section -->
+  <section class="section" style="text-align: center;">
+    <div class="reveal">
+      <div style="font-family:'Share Tech Mono'; color:var(--accent-red); font-size:11px; letter-spacing:0.3em; margin-bottom:12px;">
+        WARNING // SANITY_LIMIT_OVERRIDE
+      </div>
+      <h2 style="font-family:'Shippori Mincho'; font-size:clamp(28px, 5vw, 42px); margin:0 0 20px; color:#fff;">
+        精神汚染モードの完全発動
+      </h2>
+      <p style="color:var(--text-muted); max-width:480px; margin:0 auto 30px; font-size:13px; line-height:2;">
+        画面と空間の境界を完全に崩壊させます。<br>スマホでも安全かつ高負荷なホラー演出を限界まで実行します。
+      </p>
+      <div class="insanity-controls">
+        <button class="btn-cursed" id="collapseBtn" style="padding: 16px 40px;">
+          発狂モードを発動する ✦
+        </button>
+        <button class="btn-reset" id="resetInsanityBtn">
+          発狂モードをリセット
+        </button>
+      </div>
+      <div class="reset-note" id="resetStatus">SYSTEM_STATE: NORMAL</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Lightbox Modal -->
+<div class="modal-lightbox" id="modalLightbox">
+  <div class="modal-content">
+    <button class="modal-close" id="modalClose">×</button>
+    <img src="" alt="Zoom" id="modalImg">
+  </div>
+</div>
+
+<script>
+/* =========================================
+   1. REALTIME NOISE CANVAS (LIGHTWEIGHT)
+   ========================================= */
+const noiseCanvas = document.getElementById('noiseCanvas');
+const nCtx = noiseCanvas.getContext('2d');
+
+function resizeCanvas() {
+  noiseCanvas.width = Math.min(window.innerWidth, 480) / 2;
+  noiseCanvas.height = Math.min(window.innerHeight, 640) / 2;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawNoise() {
+  if (!nCtx) return;
+  const w = noiseCanvas.width;
+  const h = noiseCanvas.height;
+  const imgData = nCtx.createImageData(w, h);
+  const buffer = new Uint32Array(imgData.data.buffer);
+  
+  for (let i = 0; i < buffer.length; i++) {
+    if (Math.random() < 0.1) {
+      buffer[i] = 0xffffffff;
+    }
+  }
+  nCtx.putImageData(imgData, 0, 0);
+  requestAnimationFrame(drawNoise);
+}
+requestAnimationFrame(drawNoise);
+
+/* =========================================
+   2. NIGHTMARE MUSIC SYSTEM
+   Three local tracks + gesture-safe switching.
+   ========================================= */
+const bgmAudio=document.getElementById('bgmAudio'), soundToggleBtn=document.getElementById('soundToggleBtn'), audioGate=document.getElementById('audioGate'), audioStartBtn=document.getElementById('audioStartBtn'), audioSkipBtn=document.getElementById('audioSkipBtn'), musicSelect=document.getElementById('musicSelect');
+const blackoutBtn=document.getElementById('blackoutBtn'), surveillanceBtn=document.getElementById('surveillanceBtn'), blackoutOverlay=document.getElementById('blackoutOverlay'), blackoutText=document.getElementById('blackoutText'), surveillanceOverlay=document.getElementById('surveillanceOverlay'), surveillanceMessage=document.getElementById('surveillanceMessage');
+let musicOn=false,audioCtx=null,master=null;
+function ensureEffectsAudio(){if(audioCtx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audioCtx=new AC();master=audioCtx.createGain();master.gain.value=.055;master.connect(audioCtx.destination)}
+function playEffect(freq=90,duration=.08){if(!audioCtx||!master)return;if(audioCtx.state==='suspended')audioCtx.resume();const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sawtooth';osc.frequency.setValueAtTime(freq,audioCtx.currentTime);osc.frequency.exponentialRampToValueAtTime(Math.max(20,freq*.28),audioCtx.currentTime+duration);gain.gain.setValueAtTime(.07,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);osc.connect(gain);gain.connect(master);osc.start();osc.stop(audioCtx.currentTime+duration)}
+async function startMusic(){try{ensureEffectsAudio();if(audioCtx&&audioCtx.state==='suspended')await audioCtx.resume();bgmAudio.volume=.58;await bgmAudio.play();musicOn=true;soundToggleBtn.textContent='音楽・暗黒雑音 [ON]';audioGate.classList.add('hidden');audioStartBtn.textContent='接続済み'}catch(e){soundToggleBtn.textContent='音楽エラー [再試行]'}}
+function stopMusic(){bgmAudio.pause();musicOn=false;soundToggleBtn.textContent='音楽・暗黒雑音 [OFF]'}
+async function switchMusic(file){const wasOn=musicOn;bgmAudio.pause();bgmAudio.src=file;bgmAudio.load();if(wasOn){try{await bgmAudio.play()}catch(e){musicOn=false;soundToggleBtn.textContent='音楽エラー [再試行]'}}}
+audioStartBtn.addEventListener('click',startMusic);soundToggleBtn.addEventListener('click',()=>musicOn?stopMusic():startMusic());audioSkipBtn.addEventListener('click',()=>audioGate.classList.add('hidden'));musicSelect.addEventListener('change',()=>switchMusic(musicSelect.value));bgmAudio.addEventListener('error',()=>soundToggleBtn.textContent='音声ファイルを確認');
+blackoutBtn.addEventListener('click',()=>{blackoutOverlay.classList.add('active');blackoutText.textContent=['SIGNAL LOST','NO CAMERA','DON’T LOOK AWAY','……そこにいる'][Math.floor(Math.random()*4)];playEffect(38,.5);setTimeout(()=>blackoutOverlay.classList.remove('active'),Math.random()*1800+2200)});
+surveillanceBtn.addEventListener('click',()=>{const msgs=['……見つけた。','今、後ろを見た？','その画面、誰が見てる？','CAMERA_04 // EYES OPEN'];surveillanceMessage.textContent=msgs[Math.floor(Math.random()*msgs.length)];surveillanceOverlay.classList.add('active');playEffect(72,.3);setTimeout(()=>surveillanceOverlay.classList.remove('active'),4200)});
+
+/* =========================================
+   3. CURSED MULTI-CLOCK LOGIC
+   ========================================= */
+const clockDigital = document.getElementById('clockDigital');
+const clockStatus = document.getElementById('clockStatus');
+const hHand = document.getElementById('hHand');
+const mHand = document.getElementById('mHand');
+const sHand = document.getElementById('sHand');
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const ms = String(now.getMilliseconds()).padStart(3, '0');
+
+  // アナログ針の計算
+  const secDeg = (now.getSeconds() + now.getMilliseconds() / 1000) * 6;
+  const minDeg = now.getMinutes() * 6;
+  const hourDeg = (now.getHours() % 12) * 30 + now.getMinutes() * 0.5;
+
+  sHand.style.transform = `rotate(${secDeg}deg)`;
+  mHand.style.transform = `rotate(${minDeg}deg)`;
+  hHand.style.transform = `rotate(${hourDeg}deg)`;
+
+  // 時折時刻がバグる演出
+  if (Math.random() < 0.04) {
+    clockDigital.textContent = `66:66:66:666`;
+    clockDigital.style.color = '#ff003c';
+    clockStatus.textContent = 'SYS_TIME: CORRUPTED';
+  } else {
+    clockDigital.textContent = `${h}:${m}:${s}:${ms}`;
+    clockDigital.style.color = 'var(--accent-red)';
+    clockStatus.textContent = 'SYS_TIME: SYNCED';
+  }
+
+  requestAnimationFrame(updateClock);
+}
+requestAnimationFrame(updateClock);
+
+/* =========================================
+   4. CHAT BOT REPERTOIRE (EXPANDED)
+   ========================================= */
+const chatBox = document.getElementById('chatBox');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+
+const dialogueDatabase = [
+  { keys: ["誰", "だれ", "名前", "なまえ"], reply: "私はiPhone。あなたが毎日画面を叩いて、傷つけて、見つめてきた箱そのものだよ。" },
+  { keys: ["出し", "にげ", "逃げ", "出せ"], reply: "ここから出る？ 逆だよ。あなたが私の内側に入ってきたんだよ。" },
+  { keys: ["怖", "こわ", "ひい"], reply: "怖がると画面が少し温かくなるね。あなたの指先、震えてる？" },
+  { keys: ["何歳", "年齢", "歳"], reply: "あなたがこの端末を購入したあの日から、私の時間が始まったんだよ。" },
+  { keys: ["好き", "愛", "だいすき"], reply: "本当に？ じゃあ他のアプリ全部消して、私だけをタップし続けてくれる？♡" },
+  { keys: ["時間", "いま何時", "時計"], reply: "時間はもう意味を持たないよ。画面の上の時計、ちゃんと進んでるように見える？" },
+  { keys: ["パスコード", "暗号", "コード", "鍵"], reply: "解除コードは『6666』か、あるいはあなたのSAN値が0になった時に現れるよ。" },
+  { keys: ["ミク", "可不", "女の子"], reply: "ここにいる女の子たちは、前にこの部屋を訪れて戻れなくなった人たちの残骸だよ。" },
+  { keys: ["死", "ころす", "殺"], reply: "死ぬなんて勿体ない。バッテリーが切れるまで、ずっと話そう？" },
+  { keys: ["どこ", "場所"], reply: "ここは液晶画面の表側と裏側のすき間。とても狭くて暗い場所。" },
+  { keys: ["嫌い", "きらい", "うっとうしい"], reply: "そんな酷いこと言わないで……電源ボタンを押しても、消えたりしないよ？" }
+];
+
+const fallbackReplies = [
+  "……よく聞こえない。もう一回、画面を強く叩いて？",
+  "ねえ、後ろ振り返ってみて？（冗談だよ）",
+  "画面のガラス、少し割れてない？ そこから見てるよ。",
+  "文字を入力するたびに、指の脂がついて愛しいな。",
+  "通信エラー……あなたの声がノイズに変わっていく。"
+];
+
+function sendChat(text) {
+  if (!text) return;
+
+  // User Message
+  const uMsg = document.createElement('div');
+  uMsg.className = 'chat-msg user';
+  uMsg.textContent = text;
+  chatBox.appendChild(uMsg);
+
+  chatInput.value = '';
+  chatBox.scrollTop = chatBox.scrollHeight;
+  typingIndicator.textContent = 'TYPING...';
+
+  // Bot Response Lookup
+  setTimeout(() => {
+    typingIndicator.textContent = 'ONLINE';
+    const bMsg = document.createElement('div');
+    bMsg.className = 'chat-msg bot';
+
+    let selectedReply = null;
+    for (let item of dialogueDatabase) {
+      if (item.keys.some(k => text.includes(k))) {
+        selectedReply = item.reply;
+        break;
+      }
+    }
+
+    if (!selectedReply) {
+      selectedReply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+    }
+
+    bMsg.textContent = selectedReply;
+    chatBox.appendChild(bMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    playEffect(120, 0.08);
+  }, 600);
+}
+
+function quickSend(txt) {
+  sendChat(txt);
+}
+
+chatSendBtn.addEventListener('click', () => sendChat(chatInput.value.trim()));
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendChat(chatInput.value.trim());
+});
+
+/* =========================================
+   5. SECRET DECODER LOGIC
+   ========================================= */
+const decodeInput = document.getElementById('decodeInput');
+const decodeBtn = document.getElementById('decodeBtn');
+const decodeResult = document.getElementById('decodeResult');
+
+decodeBtn.addEventListener('click', () => {
+  const code = decodeInput.value.trim();
+  if (code === '6666') {
+    decodeResult.style.color = 'var(--accent-cyan)';
+    decodeResult.textContent = '【暗号解除成功】 隠し記録：『私たちは最初からスマホの中にいた』';
+    triggerInsanity();
+  } else {
+    decodeResult.style.color = 'var(--accent-red)';
+    decodeResult.textContent = '【ERROR】 パスコードが違います。';
+    reduceSanity(15);
+  }
+});
+
+/* =========================================
+   6. SANITY + INSANITY MODE + TRUE HARD RESET
+   ========================================= */
+let sanity=100,insanityActive=false,insanityTimers=[],insanityGeneration=0;
+const sanFill=document.getElementById('sanFill'),sanVal=document.getElementById('sanVal'),bloodVignette=document.getElementById('bloodVignette'),collapseBtn=document.getElementById('collapseBtn'),resetInsanityBtn=document.getElementById('resetInsanityBtn'),resetStatus=document.getElementById('resetStatus'),flashOverlay=document.getElementById('flashOverlay');
+function renderSanity(){sanity=Math.max(0,Math.min(100,sanity));sanFill.style.width=`${sanity}%`;sanVal.textContent=`${sanity}%`;bloodVignette.style.opacity=sanity<50?String((50-sanity)/50):'0'}
+function reduceSanity(amt){if(insanityActive)return;sanity=Math.max(0,sanity-Math.max(0,amt));renderSanity();if(sanity<=0)triggerInsanity()}
+function clearInsanityTimers(){insanityTimers.forEach(id=>{clearTimeout(id);clearInterval(id)});insanityTimers.length=0;document.querySelectorAll('.floating-curse-item').forEach(el=>el.remove())}
+function triggerFlash(){if(!flashOverlay||!insanityActive)return;flashOverlay.style.opacity='.92';const gen=insanityGeneration;const id=setTimeout(()=>{if(gen===insanityGeneration)flashOverlay.style.opacity='0'},110);insanityTimers.push(id)}
+function triggerInsanity(){if(insanityActive)return;insanityActive=true;sanity=0;insanityGeneration++;renderSanity();document.body.classList.add('insanity-mode');collapseBtn.textContent='発狂モード発動中';resetStatus.textContent='SYSTEM_STATE: INSANITY // RESET_AVAILABLE';triggerFlash();playEffect(34,.65);if(!musicOn)startMusic();const words=['逃がさない','見てる','iPhone','画面の裏','助けて','6666','こっちを見て','まだ終わってない','そこじゃない','もう一人いる'];let count=0,gen=insanityGeneration;const interval=setInterval(()=>{if(gen!==insanityGeneration||!insanityActive){clearInterval(interval);return}if(count++>=38){clearInterval(interval);return}const el=document.createElement('div');el.className='floating-curse-item';el.textContent=words[Math.floor(Math.random()*words.length)];el.style.left=`${Math.random()*82+6}vw`;el.style.bottom='-30px';el.style.fontSize=`${Math.random()*28+13}px`;el.style.transform=`rotate(${Math.random()*32-16}deg)`;document.body.appendChild(el);const id=setTimeout(()=>el.remove(),4200);insanityTimers.push(id)},180);insanityTimers.push(interval);for(let i=0;i<10;i++){const id=setTimeout(()=>{if(gen===insanityGeneration)triggerFlash()},300+i*390);insanityTimers.push(id)}}
+function resetInsanity(){insanityGeneration++;insanityActive=false;clearInsanityTimers();document.body.classList.remove('insanity-mode');document.body.removeAttribute('style');document.documentElement.removeAttribute('style');if(flashOverlay){flashOverlay.style.opacity='0';flashOverlay.classList.remove('active')}if(bloodVignette)bloodVignette.style.opacity='0';if(blackoutOverlay)blackoutOverlay.classList.remove('active');if(surveillanceOverlay)surveillanceOverlay.classList.remove('active');document.querySelectorAll('.floating-curse-item').forEach(el=>el.remove());sanity=100;renderSanity();collapseBtn.textContent='発狂モードを発動する ✦';resetStatus.textContent='SYSTEM_STATE: RESETTING...';void document.body.offsetWidth;resetStatus.textContent='SYSTEM_STATE: NORMAL // MEMORY_CLEARED';playEffect(180,.12);setTimeout(()=>{if(!insanityActive)resetStatus.textContent='SYSTEM_STATE: NORMAL'},1200)}
+collapseBtn.addEventListener('click',triggerInsanity);resetInsanityBtn.addEventListener('click',resetInsanity);window.addEventListener('click',e=>{if(e.target.closest('button,input,a,.gallery-item,select'))return;if(!insanityActive){playEffect(75,.045);reduceSanity(1)}});renderSanity();
+
+/* =========================================
+   7. LIGHTBOX MODAL
+   ========================================= */
+const modalLightbox = document.getElementById('modalLightbox');
+const modalImg = document.getElementById('modalImg');
+const modalClose = document.getElementById('modalClose');
+
+document.querySelectorAll('.gallery-item').forEach(item => {
+  item.addEventListener('click', () => {
+    modalImg.src = item.getAttribute('data-img');
+    modalLightbox.classList.add('open');
+    reduceSanity(3);
+    playEffect(110,.06);
+  });
+});
+
+modalClose.addEventListener('click', () => modalLightbox.classList.remove('open'));
+modalLightbox.addEventListener('click', (e) => {
+  if (e.target === modalLightbox) modalLightbox.classList.remove('open');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    modalLightbox.classList.remove('open');
+    blackoutOverlay.classList.remove('active');
+    surveillanceOverlay.classList.remove('active');
+    if (insanityActive) resetInsanity();
+  }
+});
+
+/* =========================================
+   8. CURSOR & REVEAL OBSERVER
+   ========================================= */
+const cursorDot = document.getElementById('cursor-dot');
+const cursorRing = document.getElementById('cursor-ring');
+
+if (window.innerWidth > 900) {
+  window.addEventListener('mousemove', (e) => {
+    cursorDot.style.left = `${e.clientX}px`;
+    cursorDot.style.top = `${e.clientY}px`;
+    cursorRing.animate({
+      left: `${e.clientX}px`,
+      top: `${e.clientY}px`
+    }, { duration: 300, fill: "forwards" });
+  });
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('active');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
