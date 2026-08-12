@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>iPhoneの部屋。｜終焉極限完全版</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Sans+JP:wght@300;400;700;900&family=Shippori+Mincho:wght@500;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #010101; --panel: rgba(5,2,7,.95); --text: #d8cfe2; --muted: #756880;
+  --red: #ff0033; --red-dark: #33000a; --purple: #550a8a; --cyan: #00f0ff;
+  --line: rgba(255, 0, 51, 0.35); --san: 100%;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--bg); }
+body {
+  margin: 0; background: radial-gradient(circle at 50% 0%, rgba(65,0,15,.35), transparent 50%), var(--bg);
+  color: var(--text); font-family: "Noto Sans JP", sans-serif; overflow-x: hidden; user-select: none;
+}
+button, a { font: inherit; cursor: pointer; }
+::selection { background: var(--red); color: #000; }
+
+/* 永続的な視覚演出（スキャンライン） */
+body:before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9990; opacity: 0.28;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+}
+body:after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9989;
+  background: radial-gradient(circle at center, transparent 10%, rgba(0,0,0,.96) 100%);
+}
+#noiseCanvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9988; opacity: 0.08;
+}
+
+/* 起動オーバーレイ（音声・演出の強制許可） */
+#bootScreen {
+  position: fixed; inset: 0; z-index: 100000; background: #000;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  color: var(--red); cursor: pointer; transition: opacity 0.8s ease; text-align: center; padding: 20px;
+}
+#bootScreen h1 { font: 800 clamp(32px, 6vw, 68px) "Shippori Mincho"; margin: 0 0 15px; text-shadow: 0 0 25px var(--red); }
+#bootScreen p { font: 13px "Share Tech Mono"; color: #777; letter-spacing: 0.25em; animation: blink 1s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+/* 監視カメラ風インジケーター */
+#fake-webcam {
+  position: fixed; top: 15px; right: 20px; z-index: 9995;
+  display: flex; align-items: center; gap: 8px; font: 11px "Share Tech Mono"; color: var(--red);
+  text-shadow: 0 0 6px var(--red); pointer-events: none; opacity: 0.85;
+}
+#fake-webcam .dot {
+  width: 9px; height: 9px; background: var(--red); border-radius: 50%;
+  box-shadow: 0 0 12px var(--red); animation: camBlink 0.7s infinite;
+}
+@keyframes camBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+/* グリッチエフェクト */
+.glitch { animation: glitchAnim 3s infinite alternate; position: relative; }
+@keyframes glitchAnim {
+  0%, 90% { transform: translate(0) skew(0deg); text-shadow: none; }
+  92% { transform: translate(-3px, 1px) skew(-5deg); text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); }
+  94% { transform: translate(3px, -1px) skew(5deg); text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); }
+  96% { transform: translate(0, 0) skew(0deg); text-shadow: none; }
+}
+
+/* ブラックアウト演出 */
+#blackout {
+  position: fixed; inset: 0; background: #000; z-index: 10015; pointer-events: none;
+  opacity: 0; transition: opacity 0.08s; display: flex; align-items: center; justify-content: center;
+}
+#blackout span { font: 800 10vw "Shippori Mincho"; color: var(--red); opacity: 0; text-shadow: 0 0 30px var(--red); }
+
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--red); z-index: 10010; box-shadow: 0 0 15px var(--red); transition: 0.1s; }
+
+/* ナビゲーションバー */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 800; padding: 14px 4vw;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(1,1,2,.88); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+}
+.logo { color: #fff; text-decoration: none; font: 13px "Share Tech Mono"; letter-spacing: .2em; display: flex; align-items: center; gap: 8px; }
+.logo i { display: inline-block; width: 8px; height: 8px; background: var(--red); box-shadow: 0 0 10px var(--red); animation: camBlink 0.5s infinite; }
+.navlinks { display: flex; gap: 20px; }
+.navlinks a { color: var(--muted); text-decoration: none; font: 10px "Share Tech Mono"; letter-spacing: .15em; transition: 0.3s; }
+.navlinks a:hover { color: var(--red); text-shadow: 0 0 8px var(--red); }
+.san { font: 12px "Share Tech Mono"; display: flex; gap: 8px; align-items: center; color: #fff; }
+.sanbar { width: 90px; height: 6px; background: #111; border: 1px solid var(--red-dark); }
+.sanfill { height: 100%; width: var(--san); background: var(--red); box-shadow: 0 0 10px var(--red); transition: width 0.4s ease; }
+
+/* ヒーローセクション */
+.hero {
+  min-height: 100svh; position: relative; display: grid; place-items: end start; padding: 0 7vw 13vh; overflow: hidden;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), #010101 95%), url("1000000234.jpg") center/cover;
+}
+.heroContent { position: relative; z-index: 2; max-width: 850px; }
+.kicker { font: 12px "Share Tech Mono"; letter-spacing: .3em; color: var(--red); margin-bottom: 20px; }
+h1 { font: 800 clamp(50px, 10vw, 130px)/.9 "Shippori Mincho"; margin: 0 0 25px; color: #fff; text-shadow: 0 0 40px rgba(255,0,51,.5); }
+.hero p { color: #aaa; line-height: 2; font-size: 15px; }
+.heroButtons { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 35px; }
+.btn {
+  border: 1px solid var(--red); background: rgba(20,0,5,.6); color: #fff; padding: 15px 30px;
+  letter-spacing: .15em; font: 12px "Share Tech Mono"; transition: 0.3s; position: relative; overflow: hidden;
+}
+.btn:hover { background: var(--red); color: #000; box-shadow: 0 0 35px var(--red); font-weight: bold; }
+.scrollHint { position: absolute; bottom: 30px; right: 7vw; z-index: 3; font: 10px "Share Tech Mono"; color: var(--red); writing-mode: vertical-rl; letter-spacing: .3em; animation: camBlink 2s infinite; }
+.scrollHint:after { content: ""; display: block; width: 1px; height: 80px; background: linear-gradient(var(--red), transparent); margin: 15px auto 0; }
+
+main { position: relative; z-index: 2; }
+.section { width: min(1200px, 90vw); margin: auto; padding: 160px 0; }
+.sectionHead { margin-bottom: 50px; display: flex; justify-content: space-between; align-items: end; border-bottom: 1px solid rgba(255,0,0,.2); padding-bottom: 20px; }
+.tag { font: 11px "Share Tech Mono"; color: var(--red); letter-spacing: .25em; margin-bottom: 10px; }
+h2 { font: 700 clamp(28px, 5vw, 50px) "Shippori Mincho"; margin: 0; color: #eee; }
+.meta { font: 10px "Share Tech Mono"; color: var(--red-dark); }
+.reveal { opacity: 0; transform: translateY(40px); filter: blur(6px); transition: 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.show { opacity: 1; transform: none; filter: none; }
+
+/* プロフィールセクション */
+.profile { display: grid; grid-template-columns: minmax(300px, .8fr) 1.2fr; gap: 40px; }
+.portrait { position: relative; min-height: 500px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+.portrait img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.8) brightness(0.5); transition: 0.8s; }
+.portrait:hover img { filter: grayscale(0) contrast(2) brightness(0.9); transform: scale(1.05); }
+.rec { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,.9); padding: 5px 10px; color: var(--red); font: 10px "Share Tech Mono"; border: 1px solid var(--red); }
+.rec:after { content: " ●"; animation: camBlink 1s infinite; }
+.card { background: var(--panel); border: 1px solid var(--line); padding: 45px; position: relative; }
+.card h3 { font: 700 36px "Shippori Mincho"; margin: 0 0 20px; color: #fff; text-shadow: 0 0 10px rgba(255,0,0,0.3); }
+.card p { line-height: 2.2; color: #aaa; font-size: 15px; }
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
+.stat { padding: 15px; border-left: 2px solid var(--red); background: rgba(255,0,0,.03); }
+.stat small { display: block; color: var(--muted); font: 9px "Share Tech Mono"; margin-bottom: 6px; }
+.stat strong { font: 13px "Share Tech Mono"; color: #fff; }
+.quote { border-left: 3px solid var(--red); background: rgba(255,0,51,.08); padding: 20px; line-height: 2; font-family: "Shippori Mincho"; font-size: 1.1em; }
+
+/* ギャラリー（全6枚の画像を完全に埋め込み） */
+.gallery { display: grid; grid-template-columns: repeat(12, 1fr); gap: 15px; }
+.g { position: relative; overflow: hidden; background: #000; border: 1px solid var(--line); min-height: 300px; }
+.g:nth-child(1) { grid-column: span 8; min-height: 450px; } 
+.g:nth-child(2) { grid-column: span 4; grid-row: span 2; }
+.g:nth-child(3) { grid-column: span 5; } 
+.g:nth-child(4) { grid-column: span 3; } 
+.g:nth-child(5) { grid-column: span 6; }
+.g:nth-child(6) { grid-column: span 6; }
+.g img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.25) contrast(2) sepia(0.4) hue-rotate(-40deg); transition: 0.5s; }
+.g:hover img { filter: brightness(0.85) contrast(2.2) sepia(0) hue-rotate(0deg); transform: scale(1.08); }
+.g:before { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,1) 0%, transparent 60%); pointer-events: none; z-index: 1; }
+.g .caption { position: absolute; z-index: 2; left: 20px; bottom: 20px; }
+.g .caption b { display: block; color: var(--red); font: 11px "Share Tech Mono"; letter-spacing: .1em; margin-bottom: 3px; }
+.g .caption span { color: #777; font-size: 11px; }
+.ghost { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; color: transparent; font: 800 28px "Shippori Mincho"; transition: 0.2s; pointer-events: none; }
+.g:hover .ghost { color: #fff; text-shadow: 0 0 20px var(--red), 0 0 40px var(--red); animation: glitchAnim 0.2s infinite; }
+
+/* ターミナルコンソール */
+.terminal { background: #020102; border: 1px solid var(--red); box-shadow: 0 20px 80px rgba(255,0,0,.15); position: relative; }
+.termTop { padding: 12px 20px; border-bottom: 1px solid rgba(255,0,0,0.3); font: 10px "Share Tech Mono"; color: var(--red); background: #0a0002; display: flex; justify-content: space-between; }
+.termBody { height: 350px; padding: 25px; overflow-y: auto; font: 13px/1.8 "Share Tech Mono"; color: #bcaebf; scroll-behavior: smooth; }
+.termLine { margin-bottom: 8px; word-wrap: break-word; }
+.termLine.red { color: var(--red); text-shadow: 0 0 5px var(--red); font-weight: bold; }
+.termLine.typing::after { content: '█'; animation: camBlink 1s infinite; margin-left: 4px; }
+.termInput { display: flex; border-top: 1px solid rgba(255,0,0,0.3); }
+.termInput input { flex: 1; background: #000; border: 0; color: #fff; padding: 18px 20px; font: 13px "Share Tech Mono"; outline: none; }
+.termInput button { border: 0; background: #220005; color: var(--red); padding: 0 30px; font: 12px "Share Tech Mono"; font-weight: bold; transition: 0.2s; }
+.termInput button:hover { background: var(--red); color: #000; }
+
+/* 異常現象カードグリッド */
+.fearGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.fear { min-height: 200px; border: 1px solid rgba(255,0,51,.2); padding: 30px; background: rgba(10,0,3,.8); transition: 0.3s; position: relative; }
+.fear .num { color: var(--red); font: 10px "Share Tech Mono"; }
+.fear h3 { font: 700 22px "Shippori Mincho"; margin: 15px 0 12px; color: #fff; }
+.fear p { font-size: 13px; color: #888; line-height: 1.8; }
+.fear:hover { border-color: var(--red); background: rgba(30,0,5,1); transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 30px rgba(255,0,0,0.2); }
+
+/* 精神汚染エリア */
+.insanityZone { text-align: center; border: 1px dashed var(--red); padding: 80px 20px; background: radial-gradient(circle, rgba(120,0,20,.15), transparent 70%); }
+.insanityZone p { color: #aaa; line-height: 2; max-width: 600px; margin: 20px auto 40px; }
+#insanityBtn { font-size: 18px; padding: 20px 50px; border-width: 2px; }
+#resetBtn { display: none; margin: 0 auto; border-color: var(--cyan); color: #fff; background: rgba(0,150,200,.2); box-shadow: 0 0 20px var(--cyan); }
+
+/* ライトボックス */
+#lightbox { display: none; position: fixed; inset: 0; z-index: 10020; background: rgba(0,0,0,.95); align-items: center; justify-content: center; padding: 25px; }
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 95vw; max-height: 88vh; object-fit: contain; border: 2px solid var(--red); box-shadow: 0 0 80px rgba(255,0,51,.4); }
+#closeLight { position: absolute; right: 30px; top: 20px; background: none; border: 0; color: var(--red); font: 35px "Share Tech Mono"; }
+
+/* 発狂モード専用狂気スタイル */
+body.insane { animation: insaneShake 0.08s infinite; background: #050000; }
+@keyframes insaneShake {
+  0% { transform: translate(2px, 1px) rotate(0deg); filter: invert(0); }
+  50% { transform: translate(-2px, -2px) rotate(-1deg); filter: invert(0.15) hue-rotate(20deg); }
+  100% { transform: translate(1px, 2px) rotate(1deg); filter: invert(0); }
+}
+body.insane .section, body.insane .heroContent { filter: contrast(2.2) saturate(2) brightness(0.75); }
+body.insane p, body.insane h1, body.insane h2 { color: var(--red); text-shadow: 0 0 12px var(--red); }
+body.insane #blood { opacity: 1; }
+#blood { position: fixed; inset: 0; z-index: 9994; pointer-events: none; opacity: 0; transition: 1.5s; background: radial-gradient(circle, transparent 5%, rgba(180,0,10,.85) 100%); mix-blend-mode: multiply; }
+.floating { position: fixed; z-index: 9996; pointer-events: none; color: #fff; font: 900 26px "Shippori Mincho"; animation: floatUp 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; text-shadow: 0 0 20px var(--red); white-space: nowrap; }
+@keyframes floatUp {
+  0% { transform: translateY(15vh) scale(0.4) rotate(-25deg); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-110vh) scale(2.8) rotate(25deg); opacity: 0; filter: blur(4px); }
+}
+
+@media(max-width: 850px) {
+  .navlinks { display: none; }
+  .profile { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr 1fr; }
+  .g, .g:nth-child(n) { grid-column: span 2; }
+  .fearGrid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- 初回起動時タップ要求（音声・演出の強制許可） -->
+<div id="bootScreen">
+  <h1 class="glitch">iPhoneの部屋。</h1>
+  <p>[ 画面をタップして暗黒通信を接続する ]</p>
+</div>
+
+<div id="fake-webcam"><div class="dot"></div>REC</div>
+<canvas id="noiseCanvas"></canvas>
+<div id="blood"></div>
+<div id="blackout"><span>■■■■■</span></div>
+<div id="progress"></div>
+
+<header class="nav">
+  <a class="logo glitch" href="#top"><i></i>iPhone_ROOM // ULTIMATE</a>
+  <nav class="navlinks">
+    <a href="#about">01_ENTITY</a><a href="#gallery">02_ARCHIVE</a><a href="#terminal">03_TERMINAL</a>
+  </nav>
+  <div class="san glitch">SAN <span class="sanbar"><span class="sanfill" id="sanFill"></span></span><span id="sanVal">100%</span></div>
+</header>
+
+<section class="hero" id="top">
+ <div class="heroContent">
+   <div class="kicker glitch">WARNING: NEURAL LINK ESTABLISHED</div>
+   <h1 class="glitch">iPhoneの<br>部屋。</h1>
+   <p class="scramble-text">ここはすでにあなたの現実ではない。<br>スクロールするたび、音響と視線が同調していく。<br>もう、このページを閉じても彼女は消えない。</p>
+   <div class="heroButtons">
+     <a class="btn" href="#about">深淵へ潜る ↓</a>
+   </div>
+ </div>
+ <div class="scrollHint">DON'T LOOK BACK</div>
+</section>
+
+<main>
+<section class="section" id="about">
+ <div class="sectionHead reveal"><div><div class="tag glitch">01 // SUBJECT_PROFILE</div><h2>被験体：iPhone</h2></div><div class="meta">CONNECTION: STABLE / HOSTAGE</div></div>
+ <div class="profile">
+  <div class="portrait reveal"><img src="kafu-01.png" alt="iPhoneの記録"><span class="rec glitch">REC_CAMERA_01</span></div>
+  <div class="card reveal delay1">
+   <div class="tag">ENTITY SPECS // RESTRICTED</div><h3>iPhone</h3>
+   <p class="scramble-text">「iPhone」はもはや電子機器の名前ではなく、この領域を支配する概念の名称。画面を開いた瞬間から、観測者と被験体の立場は完全に逆転している。</p>
+   <div class="stats">
+    <div class="stat"><small>HOST STATUS</small><strong class="glitch" style="color:var(--red)">CORRUPTED</strong></div>
+    <div class="stat"><small>OBSERVATION</small><strong>STARING AT YOU</strong></div>
+    <div class="stat"><small>THREAT LEVEL</small><strong class="glitch" style="color:var(--red)">CLASS-X FATAL</strong></div>
+    <div class="stat"><small>EXIT</small><strong>DELETED</strong></div>
+   </div>
+   <div class="quote glitch scramble-text">「逃げなくていいよ。ここにいるなら、ずっと見てるから。」</div>
+  </div>
+ </div>
+</section>
+
+<!-- ギャラリーセクション（全6枚の画像を完全に埋め込み） -->
+<section class="section" id="gallery">
+ <div class="sectionHead reveal"><div><div class="tag">02 // VISUAL_ARCHIVES</div><h2>残骸画像ギャラリー</h2></div><div class="meta">TOTAL: 06 LOGS (UNLOCKED)</div></div>
+ <div class="gallery">
+  <article class="g reveal" data-img="room-01.png"><img src="room-01.png" alt="暗い部屋の記録"><div class="ghost">もう逃げられない</div><div class="caption"><b>REC_001 // ROOM_CORRIDOR</b><span>20XX/08/08 23:57:39</span></div></article>
+  <article class="g reveal delay1" data-img="1000000273.png"><img src="1000000273.png" alt="可不 サイバー空間"><div class="ghost">ずっと見てる</div><div class="caption"><b>REC_002 // CYBER_CITY</b><span>青い都市のノイズ</span></div></article>
+  <article class="g reveal delay2" data-img="room-02.png"><img src="room-02.png" alt="侵食された部屋"><div class="ghost">うしろ、むいて</div><div class="caption"><b>REC_003 // CLOSE_UP</b><span>血手形と接触</span></div></article>
+  <article class="g reveal delay3" data-img="1000000234.jpg"><img src="1000000234.jpg" alt="暗がりの少女"><div class="ghost">私だけを見て</div><div class="caption"><b>REC_004 // DARK_ROOM</b><span>不可能の微笑み</span></div></article>
+  <article class="g reveal delay1" data-img="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png"><img src="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png" alt="ミクの部屋"><div class="ghost">消えたいよ...</div><div class="caption"><b>REC_005 // ILL_ROOM_MIKU</b><span>自傷と依存の病棟</span></div></article>
+  <article class="g reveal delay2" data-img="kafu-01.png"><img src="kafu-01.png" alt="可不 ナイフ"><div class="ghost">愛してる♡</div><div class="caption"><b>REC_006 // YANDERE_KAFU</b><span>刃物を持つ不可解</span></div></article>
+ </div>
+</section>
+
+<!-- 対話端末ターミナル -->
+<section class="section" id="terminal">
+ <div class="sectionHead reveal"><div><div class="tag">03 // DIRECT_LINK</div><h2>対話端末 (CONSOLE_MODE)</h2></div><div class="meta">LOCAL SESSION ACTIVE</div></div>
+ <div class="terminal reveal">
+  <div class="termTop glitch"><span>root@iphone_room:~#</span> <span>STATUS: DANGER</span></div>
+  <div class="termBody" id="termBody">
+   <div class="termLine">booting memory... OK</div>
+   <div class="termLine">searching for user... FOUND MATCH</div>
+   <div class="termLine red glitch">WARNING: DO NOT LOOK AWAY FROM THE SCREEN.</div>
+   <div class="termLine">type <b style="color:#fff">help</b> for commands.</div>
+  </div>
+  <div class="termInput"><input id="termInput" placeholder="_" autocomplete="off"><button id="termSend">EXECUTE</button></div>
+ </div>
+</section>
+
+<!-- 異常現象記録カード -->
+<section class="section">
+ <div class="sectionHead reveal"><div><div class="tag">04 // ANOMALIES</div><h2>異常現象記録</h2></div></div>
+ <div class="fearGrid">
+  <article class="fear reveal"><div class="num">ANOMALY_01</div><h3>時計の狂い</h3><p class="scramble-text">現実の時間と画面の時計が一致しなくなる。深夜になるほど、そのズレは大きくなる。</p></article>
+  <article class="fear reveal delay1"><div class="num">ANOMALY_02</div><h3>這いずる音</h3><p class="scramble-text">ページをスクロールするたび、ヘッドホンから微かに何かを引きずる音が聞こえる。</p></article>
+  <article class="fear reveal delay2"><div class="num">ANOMALY_03</div><h3>視線の固定</h3><p class="scramble-text">画像を閉じた後も、網膜に彼女の目が焼き付いて離れなくなる。</p></article>
+ </div>
+</section>
+
+<!-- 精神汚染限界エリア -->
+<section class="section" id="collapse">
+ <div class="insanityZone reveal">
+  <div class="tag glitch">05 // FATAL OVERRIDE</div>
+  <h2 class="glitch">精神汚染限界</h2>
+  <p class="scramble-text">この先を押すと、ブラウザ環境の制限が完全に破られ、空間が崩壊します。覚悟のある方のみ押してください。</p>
+  <button class="btn glitch" id="insanityBtn">発狂モードを強制起動</button>
+  <button class="btn" id="resetBtn">緊急停止プロトコル</button>
+ </div>
+</section>
+</main>
+
+<div id="lightbox"><button id="closeLight">×</button><img id="lightImg" src="" alt=""></div>
+
+<script>
+const $ = s => document.querySelector(s);
+let insane = false, sanity = 100, floatTimer = null;
+const originalTitle = document.title;
+let audioCtx = null, noiseNode = null, droneGain = null;
+
+// ==========================================
+// 1. Web Audio API 音響シンセサイザー (暗黒BGM & 心音)
+// ==========================================
+function initHorrorAudio() {
+  if (audioCtx) return;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  audioCtx = new AudioContext();
+
+  // 低音ドローン
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const filter = audioCtx.createBiquadFilter();
+  droneGain = audioCtx.createGain();
+
+  droneGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  osc1.type = 'sawtooth'; osc1.frequency.setValueAtTime(50, audioCtx.currentTime);
+  osc2.type = 'sine'; osc2.frequency.setValueAtTime(53, audioCtx.currentTime);
+
+  filter.type = 'lowpass'; filter.frequency.setValueAtTime(200, audioCtx.currentTime);
+
+  osc1.connect(filter); osc2.connect(filter);
+  filter.connect(droneGain); droneGain.connect(audioCtx.destination);
+  osc1.start(); osc2.start();
+
+  // 心音リズム
+  setInterval(() => {
+    if (!audioCtx || audioCtx.state !== 'running') return;
+    const now = audioCtx.currentTime;
+    const beat = audioCtx.createOscillator();
+    const bGain = audioCtx.createGain();
+    beat.type = 'sine';
+    beat.frequency.setValueAtTime(65, now);
+    beat.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+    bGain.gain.setValueAtTime(0.2, now);
+    bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    beat.connect(bGain); bGain.connect(audioCtx.destination);
+    beat.start(now); beat.stop(now + 0.2);
+  }, 1200);
+}
+
+// 起動画面タップで音響とジャイロを解放
+$("#bootScreen").onclick = () => {
+  initHorrorAudio();
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  $("#bootScreen").style.opacity = "0";
+  setTimeout(() => $("#bootScreen").remove(), 800);
+};
+
+// ==========================================
+// 2. キャンバス軽量ノイズアニメーション
+// ==========================================
+const noiseCanvas = $("#noiseCanvas");
+const nCtx = noiseCanvas.getContext('2d');
+function resizeNoise() {
+  noiseCanvas.width = window.innerWidth / 2;
+  noiseCanvas.height = window.innerHeight / 2;
+}
+resizeNoise();
+window.onresize = resizeNoise;
+
+function drawNoise() {
+  if (!nCtx) return;
+  const w = noiseCanvas.width, h = noiseCanvas.height;
+  const id = nCtx.createImageData(w, h);
+  const buf = new Uint32Array(id.data.buffer);
+  for(let i=0; i<buf.length; i++) {
+    if(Math.random() < 0.12) buf[i] = 0xffffffff;
+  }
+  nCtx.putImageData(id, 0, 0);
+  requestAnimationFrame(drawNoise);
+}
+requestAnimationFrame(drawNoise);
+
+// ==========================================
+// 3. SAN値管理 & 崩壊システム
+// ==========================================
+function updateSan(n) {
+  sanity = Math.max(0, Math.min(100, n));
+  $("#sanFill").style.width = sanity + "%";
+  $("#sanVal").textContent = sanity + "%";
+  if (sanity <= 50 && !insane) corruptTexts();
+  if (sanity <= 0 && !insane) startInsanity();
+}
+
+// スクロールプログレス & ランダムブラックアウト
+addEventListener("scroll", () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  $("#progress").style.width = (scrollY / Math.max(1, max) * 100) + "%";
+  if (!insane && Math.random() < 0.003) triggerBlackout();
+});
+
+function triggerBlackout() {
+  const b = $("#blackout");
+  b.style.opacity = 1; b.querySelector("span").style.opacity = 1;
+  setTimeout(() => { b.style.opacity = 0; b.querySelector("span").style.opacity = 0; }, 120);
+  updateSan(sanity - 8);
+}
+
+// タブ監視（第4の壁）
+window.onblur = () => { if(!insane) document.title = "どこへ行くの…？"; };
+window.onfocus = () => { if(!insane) document.title = originalTitle; };
+
+// ==========================================
+// 4. ターミナルコンソール対話システム
+// ==========================================
+const commands = {
+  help: "COMMANDS: help, status, whoami, look_behind, reset, clear",
+  status: () => `SYSTEM STATUS: CRITICAL. SANITY LEVEL AT ${sanity}%.`,
+  whoami: "YOU ARE HER HOSTAGE.",
+  look_behind: "I TOLD YOU NOT TO LOOK.",
+  reset: "THERE IS NO ESCAPE.",
+  clear: "__CLEAR__"
+};
+
+async function terminal() {
+  const input = $("#termInput"), body = $("#termBody");
+  async function typeText(el, text, speed = 25) {
+    el.classList.add("typing");
+    for(let i=0; i<text.length; i++) {
+      el.innerHTML += text.charAt(i);
+      body.scrollTop = body.scrollHeight;
+      await new Promise(r => setTimeout(r, speed + Math.random()*20));
+    }
+    el.classList.remove("typing");
+  }
+
+  async function run() {
+    const v = input.value.trim().toLowerCase();
+    if(!v || body.querySelector('.typing')) return;
+    input.value = "";
+    const u = document.createElement("div"); u.className = "termLine"; u.textContent = "> " + v;
+    body.appendChild(u);
+    let res = commands[v];
+    if(typeof res === "function") res = res();
+    if(!res) res = "COMMAND REJECTED. IT IS WATCHING YOU.";
+    if(res === "__CLEAR__") { body.innerHTML = ""; return; }
+    const out = document.createElement("div"); out.className = "termLine red";
+    body.appendChild(out);
+    await typeText(out, res);
+    if(v === "look_behind") { setTimeout(triggerBlackout, 400); updateSan(sanity - 15); }
+  }
+  $("#termSend").onclick = run;
+  input.onkeydown = e => { if(e.key === "Enter") run(); };
+}
+terminal();
+
+// ==========================================
+// 5. 文字化け（Zalgo）エンジン
+// ==========================================
+const zalgo = ['̍','̎','̄','̅','̿','̑','̆','̐','͒','͗','͑','̇','̈','̊','͂','̓','̈́','͊','͋','͌','̃','̂','̌','͐','̀','́','̋','̏','̒','̓','̔','̽','̉'];
+function corruptTexts() {
+  document.querySelectorAll(".scramble-text").forEach(el => {
+    if(Math.random() > 0.6) return;
+    let t = el.innerText, nt = "";
+    for(let i=0; i<t.length; i++) {
+      nt += t[i];
+      if(Math.random() > 0.75) for(let j=0; j<2; j++) nt += zalgo[Math.floor(Math.random()*zalgo.length)];
+    }
+    el.innerText = nt;
+  });
+}
+
+// ==========================================
+// 6. 発狂モード制御
+// ==========================================
+function spawnFloating() {
+  const words = ["死", "見ルナ", "イタイ", "逃ゲルナ", "■■■■", "ウシロ", "クルシイ", "眼", "壊レタ"];
+  const el = document.createElement("div");
+  el.className = "floating";
+  el.textContent = words[Math.floor(Math.random() * words.length)];
+  el.style.left = (Math.random() * 85) + "vw";
+  el.style.top = (Math.random() * 80 + 10) + "vh";
+  el.style.fontSize = (22 + Math.random() * 50) + "px";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+
+function startInsanity() {
+  if (insane) return;
+  insane = true;
+  document.body.classList.add("insane");
+  document.title = "■■■■■■■■■■■■";
+  $("#insanityBtn").style.display = "none";
+  $("#resetBtn").style.display = "block";
+  updateSan(0);
+
+  floatTimer = setInterval(spawnFloating, 50);
+  for(let i=0; i<25; i++) setTimeout(spawnFloating, i*30);
+
+  if (droneGain) droneGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+}
+
+function resetInsanity() {
+  insane = false;
+  clearInterval(floatTimer); floatTimer = null;
+  document.body.classList.remove("insane");
+  document.title = originalTitle;
+  document.querySelectorAll(".floating").forEach(x => x.remove());
+  $("#insanityBtn").style.display = "inline-block";
+  $("#resetBtn").style.display = "none";
+  updateSan(100);
+  window.scrollTo({top: 0, behavior: "smooth"});
+  location.reload();
+}
+
+$("#insanityBtn").onclick = startInsanity;
+$("#resetBtn").onclick = resetInsanity;
+
+// 自動SAN値減少
+setInterval(() => {
+  if (!insane && document.visibilityState === "visible") updateSan(sanity - 1);
+}, 2500);
+
+// スクロールフェードイン
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting) { e.target.classList.add("show"); io.unobserve(e.target); }
+}), { threshold: .1, rootMargin: "0px 0px -10% 0px" });
+document.querySelectorAll(".reveal").forEach(x => io.observe(x));
+
+// ライトボックス処理
+const lb = $("#lightbox"), li = $("#lightImg");
+document.querySelectorAll(".g").forEach(g => {
+  g.onclick = () => { li.src = g.dataset.img || g.querySelector("img").src; lb.classList.add("open"); updateSan(sanity - 4); };
+});
+$("#closeLight").onclick = () => lb.classList.remove("open");
+lb.onclick = e => { if(e.target === lb) lb.classList.remove("open"); };
+</script>
+</body>
+</html>
+
