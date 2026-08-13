@@ -1,0 +1,1228 @@
+
+:root {
+  --bg: #010101; --panel: rgba(5,2,7,.95); --text: #d8cfe2; --muted: #756880;
+  --red: #ff0033; --red-dark: #33000a; --purple: #550a8a; --cyan: #00f0ff;
+  --line: rgba(255, 0, 51, 0.35); --san: 100%;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--bg); }
+body {
+  margin: 0; background: radial-gradient(circle at 50% 0%, rgba(65,0,15,.35), transparent 50%), var(--bg);
+  color: var(--text); font-family: "Noto Sans JP", sans-serif; overflow-x: hidden; user-select: none;
+}
+button, a { font: inherit; cursor: pointer; }
+::selection { background: var(--red); color: #000; }
+
+/* 永続的な視覚演出（スキャンライン） */
+body:before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9990; opacity: 0.28;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+}
+body:after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9989;
+  background: radial-gradient(circle at center, transparent 10%, rgba(0,0,0,.96) 100%);
+}
+#noiseCanvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9988; opacity: 0.08;
+}
+
+/* 起動オーバーレイ（音声・演出の強制許可） */
+#bootScreen {
+  position: fixed; inset: 0; z-index: 100000; background: #000;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  color: var(--red); cursor: pointer; transition: opacity 0.8s ease; text-align: center; padding: 20px;
+}
+#bootScreen h1 { font: 800 clamp(32px, 6vw, 68px) "Shippori Mincho"; margin: 0 0 15px; text-shadow: 0 0 25px var(--red); }
+#bootScreen p { font: 13px "Share Tech Mono"; color: #777; letter-spacing: 0.25em; animation: blink 1s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+/* 監視カメラ風インジケーター */
+#fake-webcam {
+  position: fixed; top: 15px; right: 20px; z-index: 9995;
+  display: flex; align-items: center; gap: 8px; font: 11px "Share Tech Mono"; color: var(--red);
+  text-shadow: 0 0 6px var(--red); pointer-events: none; opacity: 0.85;
+}
+#fake-webcam .dot {
+  width: 9px; height: 9px; background: var(--red); border-radius: 50%;
+  box-shadow: 0 0 12px var(--red); animation: camBlink 0.7s infinite;
+}
+@keyframes camBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+/* グリッチエフェクト */
+.glitch { animation: glitchAnim 3s infinite alternate; position: relative; }
+@keyframes glitchAnim {
+  0%, 90% { transform: translate(0) skew(0deg); text-shadow: none; }
+  92% { transform: translate(-3px, 1px) skew(-5deg); text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); }
+  94% { transform: translate(3px, -1px) skew(5deg); text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); }
+  96% { transform: translate(0, 0) skew(0deg); text-shadow: none; }
+}
+
+/* ブラックアウト演出 */
+#blackout {
+  position: fixed; inset: 0; background: #000; z-index: 10015; pointer-events: none;
+  opacity: 0; transition: opacity 0.08s; display: flex; align-items: center; justify-content: center;
+}
+#blackout span { font: 800 10vw "Shippori Mincho"; color: var(--red); opacity: 0; text-shadow: 0 0 30px var(--red); }
+
+#progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--red); z-index: 10010; box-shadow: 0 0 15px var(--red); transition: 0.1s; }
+
+/* ナビゲーションバー */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 800; padding: 14px 4vw;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(1,1,2,.88); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+}
+.logo { color: #fff; text-decoration: none; font: 13px "Share Tech Mono"; letter-spacing: .2em; display: flex; align-items: center; gap: 8px; }
+.logo i { display: inline-block; width: 8px; height: 8px; background: var(--red); box-shadow: 0 0 10px var(--red); animation: camBlink 0.5s infinite; }
+.navlinks { display: flex; gap: 20px; }
+.navlinks a { color: var(--muted); text-decoration: none; font: 10px "Share Tech Mono"; letter-spacing: .15em; transition: 0.3s; }
+.navlinks a:hover { color: var(--red); text-shadow: 0 0 8px var(--red); }
+.san { font: 12px "Share Tech Mono"; display: flex; gap: 8px; align-items: center; color: #fff; }
+.sanbar { width: 90px; height: 6px; background: #111; border: 1px solid var(--red-dark); }
+.sanfill { height: 100%; width: var(--san); background: var(--red); box-shadow: 0 0 10px var(--red); transition: width 0.4s ease; }
+
+/* ヒーローセクション */
+.hero {
+  min-height: 100svh; position: relative; display: grid; place-items: end start; padding: 0 7vw 13vh; overflow: hidden;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), #010101 95%), url("1000000234.jpg") center/cover;
+}
+.heroContent { position: relative; z-index: 2; max-width: 850px; }
+.kicker { font: 12px "Share Tech Mono"; letter-spacing: .3em; color: var(--red); margin-bottom: 20px; }
+h1 { font: 800 clamp(50px, 10vw, 130px)/.9 "Shippori Mincho"; margin: 0 0 25px; color: #fff; text-shadow: 0 0 40px rgba(255,0,51,.5); }
+.hero p { color: #aaa; line-height: 2; font-size: 15px; }
+.heroButtons { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 35px; }
+.btn {
+  border: 1px solid var(--red); background: rgba(20,0,5,.6); color: #fff; padding: 15px 30px;
+  letter-spacing: .15em; font: 12px "Share Tech Mono"; transition: 0.3s; position: relative; overflow: hidden;
+}
+.btn:hover { background: var(--red); color: #000; box-shadow: 0 0 35px var(--red); font-weight: bold; }
+.scrollHint { position: absolute; bottom: 30px; right: 7vw; z-index: 3; font: 10px "Share Tech Mono"; color: var(--red); writing-mode: vertical-rl; letter-spacing: .3em; animation: camBlink 2s infinite; }
+.scrollHint:after { content: ""; display: block; width: 1px; height: 80px; background: linear-gradient(var(--red), transparent); margin: 15px auto 0; }
+
+main { position: relative; z-index: 2; }
+.section { width: min(1200px, 90vw); margin: auto; padding: 160px 0; }
+.sectionHead { margin-bottom: 50px; display: flex; justify-content: space-between; align-items: end; border-bottom: 1px solid rgba(255,0,0,.2); padding-bottom: 20px; }
+.tag { font: 11px "Share Tech Mono"; color: var(--red); letter-spacing: .25em; margin-bottom: 10px; }
+h2 { font: 700 clamp(28px, 5vw, 50px) "Shippori Mincho"; margin: 0; color: #eee; }
+.meta { font: 10px "Share Tech Mono"; color: var(--red-dark); }
+.reveal { opacity: 0; transform: translateY(40px); filter: blur(6px); transition: 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.show { opacity: 1; transform: none; filter: none; }
+
+/* プロフィールセクション */
+.profile { display: grid; grid-template-columns: minmax(300px, .8fr) 1.2fr; gap: 40px; }
+.portrait { position: relative; min-height: 500px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+.portrait img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.8) brightness(0.5); transition: 0.8s; }
+.portrait:hover img { filter: grayscale(0) contrast(2) brightness(0.9); transform: scale(1.05); }
+.rec { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,.9); padding: 5px 10px; color: var(--red); font: 10px "Share Tech Mono"; border: 1px solid var(--red); }
+.rec:after { content: " ●"; animation: camBlink 1s infinite; }
+.card { background: var(--panel); border: 1px solid var(--line); padding: 45px; position: relative; }
+.card h3 { font: 700 36px "Shippori Mincho"; margin: 0 0 20px; color: #fff; text-shadow: 0 0 10px rgba(255,0,0,0.3); }
+.card p { line-height: 2.2; color: #aaa; font-size: 15px; }
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
+.stat { padding: 15px; border-left: 2px solid var(--red); background: rgba(255,0,0,.03); }
+.stat small { display: block; color: var(--muted); font: 9px "Share Tech Mono"; margin-bottom: 6px; }
+.stat strong { font: 13px "Share Tech Mono"; color: #fff; }
+.quote { border-left: 3px solid var(--red); background: rgba(255,0,51,.08); padding: 20px; line-height: 2; font-family: "Shippori Mincho"; font-size: 1.1em; }
+
+/* ギャラリー（全6枚の画像を完全に埋め込み） */
+.gallery { display: grid; grid-template-columns: repeat(12, 1fr); gap: 15px; }
+.g { position: relative; overflow: hidden; background: #000; border: 1px solid var(--line); min-height: 300px; }
+.g:nth-child(1) { grid-column: span 8; min-height: 450px; } 
+.g:nth-child(2) { grid-column: span 4; grid-row: span 2; }
+.g:nth-child(3) { grid-column: span 5; } 
+.g:nth-child(4) { grid-column: span 3; } 
+.g:nth-child(5) { grid-column: span 6; }
+.g:nth-child(6) { grid-column: span 6; }
+.g img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.25) contrast(2) sepia(0.4) hue-rotate(-40deg); transition: 0.5s; }
+.g:hover img { filter: brightness(0.85) contrast(2.2) sepia(0) hue-rotate(0deg); transform: scale(1.08); }
+.g:before { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,1) 0%, transparent 60%); pointer-events: none; z-index: 1; }
+.g .caption { position: absolute; z-index: 2; left: 20px; bottom: 20px; }
+.g .caption b { display: block; color: var(--red); font: 11px "Share Tech Mono"; letter-spacing: .1em; margin-bottom: 3px; }
+.g .caption span { color: #777; font-size: 11px; }
+.ghost { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; color: transparent; font: 800 28px "Shippori Mincho"; transition: 0.2s; pointer-events: none; }
+.g:hover .ghost { color: #fff; text-shadow: 0 0 20px var(--red), 0 0 40px var(--red); animation: glitchAnim 0.2s infinite; }
+
+/* ターミナルコンソール */
+.terminal { background: #020102; border: 1px solid var(--red); box-shadow: 0 20px 80px rgba(255,0,0,.15); position: relative; }
+.termTop { padding: 12px 20px; border-bottom: 1px solid rgba(255,0,0,0.3); font: 10px "Share Tech Mono"; color: var(--red); background: #0a0002; display: flex; justify-content: space-between; }
+.termBody { height: 350px; padding: 25px; overflow-y: auto; font: 13px/1.8 "Share Tech Mono"; color: #bcaebf; scroll-behavior: smooth; }
+.termLine { margin-bottom: 8px; word-wrap: break-word; }
+.termLine.red { color: var(--red); text-shadow: 0 0 5px var(--red); font-weight: bold; }
+.termLine.typing::after { content: '█'; animation: camBlink 1s infinite; margin-left: 4px; }
+.termInput { display: flex; border-top: 1px solid rgba(255,0,0,0.3); }
+.termInput input { flex: 1; background: #000; border: 0; color: #fff; padding: 18px 20px; font: 13px "Share Tech Mono"; outline: none; }
+.termInput button { border: 0; background: #220005; color: var(--red); padding: 0 30px; font: 12px "Share Tech Mono"; font-weight: bold; transition: 0.2s; }
+.termInput button:hover { background: var(--red); color: #000; }
+
+/* 異常現象カードグリッド */
+.fearGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.fear { min-height: 200px; border: 1px solid rgba(255,0,51,.2); padding: 30px; background: rgba(10,0,3,.8); transition: 0.3s; position: relative; }
+.fear .num { color: var(--red); font: 10px "Share Tech Mono"; }
+.fear h3 { font: 700 22px "Shippori Mincho"; margin: 15px 0 12px; color: #fff; }
+.fear p { font-size: 13px; color: #888; line-height: 1.8; }
+.fear:hover { border-color: var(--red); background: rgba(30,0,5,1); transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 30px rgba(255,0,0,0.2); }
+
+/* 精神汚染エリア */
+.insanityZone { text-align: center; border: 1px dashed var(--red); padding: 80px 20px; background: radial-gradient(circle, rgba(120,0,20,.15), transparent 70%); }
+.insanityZone p { color: #aaa; line-height: 2; max-width: 600px; margin: 20px auto 40px; }
+#insanityBtn { font-size: 18px; padding: 20px 50px; border-width: 2px; }
+#resetBtn { display: none; margin: 0 auto; border-color: var(--cyan); color: #fff; background: rgba(0,150,200,.2); box-shadow: 0 0 20px var(--cyan); }
+
+/* ライトボックス */
+#lightbox { display: none; position: fixed; inset: 0; z-index: 10020; background: rgba(0,0,0,.95); align-items: center; justify-content: center; padding: 25px; }
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 95vw; max-height: 88vh; object-fit: contain; border: 2px solid var(--red); box-shadow: 0 0 80px rgba(255,0,51,.4); }
+#closeLight { position: absolute; right: 30px; top: 20px; background: none; border: 0; color: var(--red); font: 35px "Share Tech Mono"; }
+
+/* =========================================================
+   発狂モード // EXTREME FULLSCREEN LOCK
+   - 画面全体を固定レイヤー化
+   - スクロールしても演出は常にviewport全面
+   - ページUIのクリック/タッチ/キー入力を一時停止
+   - 既定時間後に自動的に終了
+   ========================================================= */
+body.insane {
+  animation: insaneShake 0.075s infinite;
+  background: #050000;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+}
+
+body.insane * {
+  cursor: none !important;
+}
+
+body.insane .nav,
+body.insane main,
+body.insane .hero {
+  filter: contrast(2.1) saturate(2.15) brightness(.72);
+}
+
+body.insane .section,
+body.insane .heroContent {
+  filter: contrast(2.35) saturate(2.25) brightness(.68);
+}
+
+body.insane p,
+body.insane h1,
+body.insane h2,
+body.insane h3 {
+  color: #ff1a45;
+  text-shadow:
+    0 0 6px #ff0033,
+    0 0 16px rgba(255,0,51,.95),
+    0 0 35px rgba(255,0,51,.55);
+}
+
+@keyframes insaneShake {
+  0%   { transform: translate(2px,1px) rotate(0deg) scale(1.001); filter: none; }
+  25%  { transform: translate(-2px,0) rotate(-.7deg) scale(1.003); filter: contrast(1.1); }
+  50%  { transform: translate(1px,-2px) rotate(.9deg) scale(1.002); filter: invert(.05); }
+  75%  { transform: translate(-1px,2px) rotate(.4deg) scale(1.004); filter: hue-rotate(12deg); }
+  100% { transform: translate(1px,-1px) rotate(-.4deg) scale(1.001); filter: none; }
+}
+
+/* 発狂オーバーレイ本体 */
+#insanityOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200000;
+  display: none;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(120,0,20,.42), transparent 18%),
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,.15), #000 76%);
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+#insanityOverlay.active {
+  display: block;
+  animation: overlayFlashIn .22s steps(2,end) both;
+}
+
+@keyframes overlayFlashIn {
+  0%   { opacity: 0; filter: invert(1); }
+  35%  { opacity: 1; filter: invert(0); }
+  55%  { opacity: .65; }
+  100% { opacity: 1; }
+}
+
+#insanityOverlay::before,
+#insanityOverlay::after {
+  content: "";
+  position: absolute;
+  inset: -5%;
+  pointer-events: none;
+}
+
+#insanityOverlay::before {
+  z-index: 1;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,.04) 0 1px,
+      rgba(0,0,0,.15) 1px 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 40px,
+      rgba(255,0,40,.03) 40px 41px
+    );
+  mix-blend-mode: screen;
+  opacity: .75;
+  animation: scanJitter .18s infinite steps(2,end);
+}
+
+#insanityOverlay::after {
+  z-index: 2;
+  background:
+    radial-gradient(circle at center, transparent 28%, rgba(0,0,0,.72) 92%),
+    repeating-radial-gradient(
+      ellipse at center,
+      transparent 0 9px,
+      rgba(255,0,30,.018) 10px 11px
+    );
+  animation: vignettePulse 1.8s infinite ease-in-out;
+}
+
+@keyframes scanJitter {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-1px,1px); }
+  50% { transform: translate(2px,-1px); }
+  75% { transform: translate(-2px,0); }
+  100% { transform: translate(1px,1px); }
+}
+
+@keyframes vignettePulse {
+  0%,100% { opacity: .8; }
+  50% { opacity: 1; }
+}
+
+/* 赤いノイズカーテン */
+#insanityStatic {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: .16;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 2px,
+      rgba(255,255,255,.08) 2px 3px
+    );
+  mix-blend-mode: screen;
+  animation: staticRoll .08s infinite steps(2,end);
+}
+
+@keyframes staticRoll {
+  0%   { transform: translateY(0); opacity: .09; }
+  50%  { transform: translateY(-8px); opacity: .2; }
+  100% { transform: translateY(5px); opacity: .12; }
+}
+
+#insanityGlitchBar {
+  position: absolute;
+  left: -10%;
+  top: 44%;
+  width: 120%;
+  height: 11vh;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 12%,
+      rgba(255,0,51,.35) 12% 18%,
+      transparent 18% 38%,
+      rgba(0,240,255,.25) 38% 47%,
+      transparent 47% 72%,
+      rgba(255,255,255,.12) 72% 78%,
+      transparent 78%
+    );
+  filter: blur(.3px);
+}
+
+#insanityOverlay.active #insanityGlitchBar {
+  animation: glitchBar 1.2s infinite steps(2,end);
+}
+
+@keyframes glitchBar {
+  0%, 72% { opacity: 0; transform: translateX(0) scaleY(.25); }
+  73% { opacity: .9; transform: translateX(-4%) scaleY(1.4); }
+  75% { opacity: .2; transform: translateX(5%) scaleY(.5); }
+  78% { opacity: .75; transform: translateX(-2%) scaleY(1); }
+  80%,100% { opacity: 0; transform: translateX(3%) scaleY(.2); }
+}
+
+/* 中央の狂気UI */
+#insanityCore {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  padding: 6vh 6vw;
+}
+
+#insanityPanel {
+  width: min(920px, 92vw);
+  min-height: min(560px, 80vh);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  border: 1px solid rgba(255,0,51,.45);
+  background:
+    radial-gradient(circle at center, rgba(55,0,8,.3), rgba(0,0,0,.75) 65%),
+    rgba(0,0,0,.55);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03) inset,
+    0 0 120px rgba(255,0,51,.16);
+  backdrop-filter: blur(3px);
+  transform: translateZ(0);
+  animation: panelBreath .8s infinite alternate ease-in-out;
+}
+
+@keyframes panelBreath {
+  from { transform: scale(.996) skewX(0deg); }
+  to   { transform: scale(1.004) skewX(.08deg); }
+}
+
+#insanityEyebrow {
+  color: #ff0033;
+  font: 900 11px/1.4 "Share Tech Mono";
+  letter-spacing: .45em;
+  margin-bottom: 18px;
+  text-shadow: 0 0 12px #ff0033;
+}
+
+#insanityTitle {
+  margin: 0;
+  color: #fff;
+  font: 900 clamp(48px, 10vw, 140px)/.82 "Shippori Mincho";
+  letter-spacing: -.03em;
+  text-shadow:
+    0 0 6px #fff,
+    0 0 24px #ff0033,
+    0 0 65px rgba(255,0,51,.8);
+  animation: titleTwitch .21s infinite steps(2,end);
+}
+
+@keyframes titleTwitch {
+  0%, 78%, 100% { transform: translate(0,0); clip-path: inset(0); }
+  80% { transform: translate(-4px,1px); clip-path: inset(10% 0 55% 0); }
+  82% { transform: translate(5px,-1px); clip-path: inset(55% 0 12% 0); }
+  84% { transform: translate(0,0); clip-path: inset(0); }
+}
+
+#insanitySub {
+  margin: 25px auto 0;
+  max-width: 620px;
+  color: #b8a5ad;
+  font: 500 clamp(12px, 1.5vw, 16px)/2.05 "Noto Sans JP";
+  letter-spacing: .08em;
+}
+
+#insanityTimerWrap {
+  width: min(620px, 84vw);
+  margin: 35px auto 22px;
+}
+
+#insanityTimerLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 10px "Share Tech Mono";
+  color: #ff4767;
+  margin-bottom: 8px;
+  letter-spacing: .22em;
+}
+
+#insanityTimerTrack {
+  position: relative;
+  height: 12px;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,0,51,.36);
+  overflow: hidden;
+}
+
+#insanityTimerFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  background:
+    linear-gradient(
+      90deg,
+      #39000b,
+      #ff0033 40%,
+      #fff 65%,
+      #ff0033 72%,
+      #39000b
+    );
+  box-shadow: 0 0 25px rgba(255,0,51,.65);
+  transform-origin: left center;
+}
+
+#insanityTimer {
+  color: #fff;
+  font: 800 clamp(40px, 8vw, 88px) "Share Tech Mono";
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(255,0,51,.95);
+  min-width: 5ch;
+}
+
+#insanityStatus {
+  min-height: 3.6em;
+  margin-top: 8px;
+  color: #ff1a45;
+  font: 900 13px/1.8 "Share Tech Mono";
+  letter-spacing: .18em;
+  text-shadow: 0 0 9px #ff0033;
+}
+
+#insanityAbort {
+  display: none;
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 20;
+  padding: 8px 12px;
+  background: rgba(0,0,0,.72);
+  border: 1px solid rgba(255,0,51,.22);
+  color: rgba(255,255,255,.22);
+  font: 9px "Share Tech Mono";
+}
+
+/* 発狂中の画面上に出る大量の文字 */
+.insaneShard {
+  position: fixed;
+  z-index: 15;
+  pointer-events: none;
+  white-space: nowrap;
+  color: rgba(255,255,255,.82);
+  font: 900 clamp(14px, 3vw, 34px) "Shippori Mincho";
+  text-shadow:
+    0 0 7px #ff0033,
+    0 0 22px rgba(255,0,51,.9);
+  mix-blend-mode: screen;
+  animation:
+    shardEnter .12s steps(2,end) both,
+    shardExit var(--life) ease-in forwards;
+}
+
+@keyframes shardEnter {
+  from { opacity: 0; transform: scale(.2) rotate(-15deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes shardExit {
+  0% { opacity: 1; }
+  70% { opacity: .95; }
+  100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) scale(1.8) rotate(var(--rot)); filter: blur(4px); }
+}
+
+.insaneFlash {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  pointer-events: none;
+  background: #fff;
+  mix-blend-mode: difference;
+  animation: flashKill .12s steps(2,end) forwards;
+}
+
+@keyframes flashKill {
+  0% { opacity: .82; }
+  100% { opacity: 0; }
+}
+
+#insanityOverlay[data-phase="critical"] #insanityPanel {
+  animation:
+    panelBreath .17s infinite alternate,
+    criticalPulse .31s infinite steps(2,end);
+}
+
+#insanityOverlay[data-phase="critical"] #insanityTitle {
+  color: #ff0033;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 12px #ff0033,
+    0 0 40px #ff0033;
+}
+
+@keyframes criticalPulse {
+  0%,100% { box-shadow: 0 0 0 1px rgba(255,0,51,.4) inset, 0 0 80px rgba(255,0,51,.25); }
+  50% { box-shadow: 0 0 0 8px rgba(255,0,51,.1) inset, 0 0 180px rgba(255,0,51,.5); }
+}
+
+#insanityOverlay[data-phase="release"] {
+  animation: releaseFlash 1.8s ease-out both;
+}
+
+@keyframes releaseFlash {
+  0% { opacity: 1; filter: none; }
+  25% { opacity: .3; filter: invert(1); }
+  45% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(8px); }
+}
+
+@media(max-width: 850px) {
+  .navlinks { display: none; }
+  .profile { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr 1fr; }
+  .g, .g:nth-child(n) { grid-column: span 2; }
+  .fearGrid { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   CINEMATIC MICRO-SYSTEMS
+   ========================================================= */
+body::selection { background: #ff0033; color: #000; }
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(255,0,51,.05) 12% 12.2%, transparent 12.2% 100%),
+    linear-gradient(180deg, transparent 0 70%, rgba(0,0,0,.85) 100%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.section::before {
+  content: attr(id);
+  position: absolute;
+  left: 0;
+  margin-top: -18px;
+  color: rgba(255,0,51,.06);
+  font: 900 9vw "Share Tech Mono";
+  pointer-events: none;
+}
+.section { position: relative; }
+.reveal.show { animation: revealNoise .75s cubic-bezier(.16,1,.3,1) both; }
+@keyframes revealNoise {
+  0% { opacity: 0; transform: translateY(40px) skewX(2deg); filter: blur(10px) contrast(1.7); }
+  60% { opacity: 1; transform: translateY(-2px) skewX(-.2deg); filter: blur(0) contrast(1.1); }
+  100% { transform: translateY(0) skewX(0); }
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  transform: skewX(-20deg);
+  transition: left .45s;
+}
+.btn:hover::before { left: 120%; }
+#termBody::-webkit-scrollbar { width: 4px; }
+#termBody::-webkit-scrollbar-track { background: #050005; }
+#termBody::-webkit-scrollbar-thumb { background: #330009; }
+.g::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 6px, rgba(255,0,51,.05) 7px 8px);
+  opacity: .18;
+  mix-blend-mode: screen;
+}
+.fear::after {
+  content: "";
+  position: absolute;
+  width: 40%;
+  height: 1px;
+  left: 10%;
+  top: 0;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  opacity: .3;
+}
+
+
+
+/* =========================================================
+   FINAL PATCH // TRUE VIEWPORT-LOCKED MADNESS
+   ========================================================= */
+html.insane-lock,
+html.insane-lock body {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  width: 100% !important;
+  min-height: 100% !important;
+}
+body.insane {
+  /* IMPORTANT: do NOT transform the body. A transformed body can trap
+     position:fixed descendants inside the body stacking context. */
+  animation: none !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+#insanityOverlay {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  z-index: 2147483647 !important;
+  transform: translateZ(0);
+  will-change: transform, opacity, filter;
+}
+#insanityOverlay.active {
+  display: block !important;
+}
+#insanityCore { position:absolute !important; inset:0 !important; }
+#insanityPanel { position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%) !important; }
+#insanityOverlay.active #insanityPanel {
+  animation: panelBreathFixed .14s infinite alternate steps(2,end) !important;
+}
+@keyframes panelBreathFixed {
+  from { transform:translate(-50%,-50%) scale(.997) skewX(-.15deg); }
+  to   { transform:translate(-50%,-50%) scale(1.008) skewX(.2deg); }
+}
+#insanityOverlay.active {
+  animation: viewportMadness .09s infinite steps(2,end) !important;
+}
+@keyframes viewportMadness {
+  0% { transform:translate3d(0,0,0); }
+  25% { transform:translate3d(-2px,1px,0); }
+  50% { transform:translate3d(2px,-1px,0); }
+  75% { transform:translate3d(-1px,-2px,0); }
+  100% { transform:translate3d(1px,2px,0); }
+}
+
+/* Music control deck */
+#musicDeck {
+  position:relative;
+  border:1px solid rgba(255,0,51,.35);
+  background:linear-gradient(145deg,rgba(20,0,5,.92),rgba(2,1,4,.98));
+  box-shadow:0 25px 80px rgba(255,0,51,.12);
+  padding:30px;
+}
+.music-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.music-track {
+  min-height:92px; text-align:left; padding:16px; color:#aaa;
+  border:1px solid rgba(255,0,51,.2); background:#050105;
+  transition:.2s; position:relative; overflow:hidden;
+}
+.music-track:hover,.music-track.active {
+  color:#fff; border-color:var(--red); background:rgba(255,0,51,.08);
+  box-shadow:0 0 25px rgba(255,0,51,.14);
+}
+.music-track .track-no { color:var(--red); font:10px "Share Tech Mono"; display:block; margin-bottom:8px; }
+.music-track strong { display:block; font:700 16px "Shippori Mincho"; }
+.music-track small { display:block; margin-top:6px; color:#666; font:9px "Share Tech Mono"; }
+.music-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:18px; }
+.music-controls button { border:1px solid rgba(255,0,51,.4); background:#090007; color:#fff; padding:10px 16px; }
+.music-controls button:hover { background:var(--red); color:#000; }
+.music-range { accent-color:#ff0033; }
+#musicNowPlaying { font:11px "Share Tech Mono"; color:var(--red); letter-spacing:.12em; }
+@media(max-width:850px){ .music-grid{grid-template-columns:1fr 1fr;} }
+@media(max-width:520px){ .music-grid{grid-template-columns:1fr;} #musicDeck{padding:20px;} }
+
+/* Event / watcher system */
+#fearControlGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.fear-control { border:1px solid rgba(255,0,51,.25); padding:22px; background:rgba(10,0,3,.7); }
+.fear-control h3 { margin:0 0 10px; color:#fff; font:700 20px "Shippori Mincho"; }
+.fear-control p { color:#777; font-size:12px; line-height:1.8; min-height:45px; }
+.fear-control button { width:100%; border:1px solid var(--red); background:#120006; color:#fff; padding:12px; }
+.fear-control button:hover { background:var(--red); color:#000; }
+#eventFeed { height:190px; overflow:auto; border-top:1px solid rgba(255,0,51,.2); margin-top:20px; padding-top:15px; font:11px/1.8 "Share Tech Mono"; color:#766b72; }
+#eventFeed .event-danger { color:var(--red); text-shadow:0 0 5px var(--red); }
+#watcherDot { position:fixed; width:9px; height:9px; border-radius:50%; background:var(--red); box-shadow:0 0 18px var(--red); pointer-events:none; z-index:9997; opacity:0; transition:opacity .3s; }
+#watcherDot.active { opacity:.8; }
+@media(max-width:850px){ #fearControlGrid{grid-template-columns:1fr;} }
+
+/* =========================================================
+   ULTIMATE HORROR VISUAL ENGINE v2
+   The overlay intentionally has its own independent stacking
+   universe and never relies on body transform/filter.
+   ========================================================= */
+html, body { isolation: auto; }
+
+#insanityOverlay {
+  --mad-red: #ff003c;
+  --mad-dark: #030003;
+  --mad-cyan: #00eaff;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  z-index: 2147483647 !important;
+  display: none;
+  overflow: hidden !important;
+  pointer-events: none;
+  background: #000;
+  isolation: isolate;
+  contain: strict;
+  transform: none !important;
+  filter: none !important;
+  clip-path: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  touch-action: none !important;
+}
+#insanityOverlay.active {
+  display: block !important;
+  pointer-events: auto !important;
+}
+#insanityOverlay * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  pointer-events: none !important;
+}
+
+#insanityBlack,
+#insanityScanlines,
+#insanityVignette,
+#insanityChromatic,
+#insanityGlitchBands,
+#insanityNoiseCanvas,
+#insanityTextField,
+#insanityCore {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#insanityBlack {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(80,0,10,.18), transparent 30%),
+    #010001;
+}
+#insanityNoiseCanvas {
+  z-index: 3;
+  opacity: .22;
+  mix-blend-mode: screen;
+  image-rendering: pixelated;
+}
+#insanityScanlines {
+  z-index: 6;
+  opacity: .38;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,.045) 2px,
+      rgba(255,255,255,.045) 3px
+    );
+  animation: madScan .065s infinite steps(2,end);
+}
+#insanityScanlines::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 13px,
+      rgba(255,0,60,.018) 13px 14px
+    );
+  animation: madHorizontalScan .11s infinite steps(2,end);
+}
+@keyframes madScan {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(4px); }
+}
+@keyframes madHorizontalScan {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-8px); }
+  100% { transform: translateX(6px); }
+}
+
+#insanityVignette {
+  z-index: 8;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 0%,
+      transparent 30%,
+      rgba(0,0,0,.2) 52%,
+      rgba(0,0,0,.78) 88%,
+      #000 100%);
+  box-shadow: inset 0 0 16vw 5vw rgba(255,0,45,.18);
+  animation: madVignette .32s infinite alternate steps(2,end);
+}
+@keyframes madVignette {
+  from { opacity:.75; }
+  to { opacity:1; }
+}
+
+#insanityChromatic {
+  z-index: 9;
+  opacity: .18;
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(90deg,
+      rgba(255,0,0,.25), transparent 35%,
+      rgba(0,255,255,.2) 70%, transparent);
+  animation: chromaticMad .14s infinite steps(2,end);
+}
+@keyframes chromaticMad {
+  0% { transform: translateX(-5px); opacity:.1; }
+  30% { transform: translateX(7px); opacity:.25; }
+  60% { transform: translateX(-3px); opacity:.16; }
+  100% { transform: translateX(4px); opacity:.22; }
+}
+
+#insanityGlitchBands {
+  z-index: 11;
+  pointer-events:none;
+  overflow:hidden;
+}
+#insanityGlitchBands::before,
+#insanityGlitchBands::after {
+  content:"";
+  position:absolute;
+  left:-10%;
+  width:120%;
+  height:18vh;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 5%,
+      rgba(255,0,60,.3) 5.2% 7%,
+      transparent 7.2% 13%,
+      rgba(0,240,255,.22) 13.2% 15%,
+      transparent 15.2% 22%
+    );
+  mix-blend-mode:screen;
+}
+#insanityGlitchBands::before {
+  top:19%;
+  animation: bandOne .53s infinite steps(2,end);
+}
+#insanityGlitchBands::after {
+  top:67%;
+  animation: bandTwo .71s infinite steps(2,end);
+}
+@keyframes bandOne {
+  0%,65% { transform:translateX(0) scaleY(.15); opacity:0; }
+  66% { transform:translateX(-8%) scaleY(1.8); opacity:.9; }
+  69% { transform:translateX(11%) scaleY(.5); opacity:.4; }
+  72%,100% { transform:translateX(0) scaleY(.1); opacity:0; }
+}
+@keyframes bandTwo {
+  0%,42% { opacity:0; transform:translateX(0) skewX(0); }
+  43% { opacity:.7; transform:translateX(6%) skewX(5deg); }
+  46% { opacity:.15; transform:translateX(-9%) skewX(-7deg); }
+  49%,100% { opacity:0; transform:translateX(0); }
+}
+
+#insanityCore {
+  z-index: 30;
+  display:grid !important;
+  place-items:center !important;
+  padding:4vh 5vw;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+#insanityPanel {
+  position:relative !important;
+  left:auto !important;
+  top:auto !important;
+  width:min(980px,92vw);
+  min-height:min(570px,82dvh);
+  padding:clamp(22px,5vw,60px);
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  border:1px solid rgba(255,0,60,.55);
+  background:
+    linear-gradient(rgba(255,0,60,.025),rgba(0,0,0,.25)),
+    radial-gradient(circle at 50% 45%,rgba(80,0,12,.36),rgba(0,0,0,.72) 67%);
+  box-shadow:
+    inset 0 0 70px rgba(255,0,60,.08),
+    0 0 70px rgba(255,0,60,.12),
+    0 0 0 1px rgba(255,255,255,.025);
+  overflow:hidden;
+  transform:none !important;
+}
+#insanityPanel::before,
+#insanityPanel::after {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+}
+#insanityPanel::before {
+  inset:0;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 5px,rgba(255,0,60,.045) 6px),
+    repeating-linear-gradient(90deg,transparent 0 17px,rgba(0,240,255,.025) 18px);
+  mix-blend-mode:screen;
+  animation: panelNoise .09s infinite steps(2,end);
+}
+#insanityPanel::after {
+  width:150%;
+  height:2px;
+  left:-25%;
+  top:50%;
+  background:linear-gradient(90deg,transparent,#fff,transparent);
+  box-shadow:0 0 16px #ff003c;
+  opacity:.35;
+  animation: centerLaser .32s infinite steps(2,end);
+}
+@keyframes panelNoise {
+  0% { transform:translate(0,0); }
+  25% { transform:translate(-2px,1px); }
+  50% { transform:translate(2px,-1px); }
+  75% { transform:translate(-1px,-2px); }
+  100% { transform:translate(1px,2px); }
+}
+@keyframes centerLaser {
+  0%,80% { transform:translateY(-40vh); opacity:0; }
+  82% { transform:translateY(0); opacity:.55; }
+  85% { transform:translateY(42vh); opacity:.1; }
+  87%,100% { opacity:0; }
+}
+
+#insanityEyebrow,
+#insanityWarning,
+#insanityCoordinates,
+#insanityExitHint {
+  position:relative;
+  z-index:2;
+  font-family:"Share Tech Mono",monospace;
+  letter-spacing:.2em;
+}
+#insanityEyebrow {
+  color:#ff4164;
+  font-size:10px;
+  margin-bottom:9px;
+}
+#insanityWarning {
+  color:rgba(255,255,255,.42);
+  font-size:9px;
+  margin-bottom:17px;
+  animation:warningBlink .17s infinite steps(2,end);
+}
+@keyframes warningBlink {
+  0%,60% { opacity:.35; }
+  61% { opacity:1; }
+}
+#insanityTitle,
+#insanityCorruptTitle {
+  position:relative;
+  z-index:2;
+  margin:0;
+  font-family:"Shippori Mincho",serif;
+  font-weight:900;
+  font-size:clamp(62px,13vw,180px);
+  line-height:.8;
+  letter-spacing:-.08em;
+}
+#insanityTitle {
+  color:#fff;
+  text-shadow:
+    2px 0 #ff003c,
+    -2px 0 #00eaff,
+    0 0 10px #fff,
+    0 0 45px #ff003c;
+  animation:titleMad .105s infinite steps(2,end);
+}
+#insanityCorruptTitle {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  color:#ff003c;
+  opacity:.18;
+  filter:blur(.3px);
+  pointer-events:none;
+  animation:corruptTitle .13s infinite steps(2,end);
+}
+@keyframes titleMad {
+  0%,70%,100% { transform:translate(0); clip-path:inset(0); }
+  72% { transform:translate(-8px,2px); clip-path:inset(8% 0 58% 0); }
+  74% { transform:translate(9px,-2px); clip-path:inset(58% 0 7% 0); }
+  76% { transform:translate(-2px,0); clip-path:inset(30% 0 30% 0); }
+}
+@keyframes corruptTitle {
+  0% { transform:translate(-50%,-50%) translate(5px,0); }
+  40% { transform:translate(-50%,-50%) translate(-9px,2px); }
+  80% { transform:translate(-50%,-50%) translate(3px,-3px); }
+  100% { transform:translate(-50%,-50%) translate(0); }
+}
+#insanitySub {
+  position:relative;
+  z-index:2;
+  max-width:720px;
+  margin:30px auto 0;
+  color:#bbaeb3;
+  font:500 clamp(11px,1.5vw,15px)/2 "Noto Sans JP",sans-serif;
+  text-shadow:0 0 8px rgba(255,0,60,.22);
+}
+#insanityTimerWrap {
+  position:relative;
+  z-index:2;
+  width:min(680px,82vw);
+  margin:30px auto 0;
+}
+#insanityTimerLabel {
+  display:flex;
+  justify-content:space-between;
+  font:9px "Share Tech Mono",monospace;
+  color:#ff4b69;
+  letter-spacing:.17em;
+  margin-bottom:7px;
+}
+#insanityTimer {
+  position:relative;
+  z-index:2;
+  min-width:5ch;
+  color:#fff;
+  font:900 clamp(42px,8vw,88px) "Share Tech Mono",monospace;
+  line-height:1;
+  text-shadow:0 0 14px #ff003c,0 0 38px rgba(255,0,60,.65);
+  animation:timerShake .09s infinite steps(2,end);
+}
+@keyframes timerShake {
+  0% { transform:translate(0); }
+  50% { transform:translate(2px,-1px); }
+  100% { transform:translate(-1px,1px); }
+}
+#insanityTimerTrack {
+  position:relative;
+  height:10px;
+  margin-top:9px;
+  overflow:hidden;
+  border:1px solid rgba(255,0,60,.5);
+  background:#090207;
+}
+#insanityTimerFill {
+  position:absolute;
+  inset:0 auto 0 0;
+  width:100%;
+  background:linear-gradient(90deg,#320008,#ff003c 40%,#fff 55%,#ff003c 70%,#320008);
+  box-shadow:0 0 22px #ff003c;
+  transform-origin:left center;
+}
+#insanityStatus {
+  position:relative;
+  z-index:2;
+  min-height:3.5em;
+  margin-top:12px;
+  color:#ff1d49;
+  font:900 12px/1.7 "Share Tech Mono",monospace;
+  letter-spacing:.13em;
+  text-shadow:0 0 9px #ff003c;
+}
+#insanityCoordinates {
+  position:relative;
+  z-index:2;
+  margin-top:15px;
+  color:rgba(255,255,255,.2);
+  font-size:8px;
+}
+#insanityExitHint {
+  position:relative;
+  z-index:2;
+  margin-top:14px;
+  color:rgba(255,255,255,.18);
+  font-size:8px;
+}
+
+/* Dense horror text particles */
+.madNoiseText {
+  position:absolute;
+  z-index:20;
+  pointer-events:none !important;
+  white-space:nowrap;
+  color:rgba(255,255,255,.8);
+  font-family:"Share Tech Mono","Noto Sans JP",monospace;
+  font-weight:900;
+  font-size:clamp(10px,2.2vw,30px);
+  letter-spacing:.08em;
+  text-shadow:
+    1px 0 #ff003c,
+    -1px 0 #00eaff,
+    0 0 8px #ff003c;
+  mix-blend-mode:screen;
+  filter:contrast(2) brightness(1.2);
+  animation:madTextFly var(--madlife,.9s) steps(9,end) forwards;
+}
+.madNoiseText::before,
+.madNoiseText::after {
+  content:attr(data-noise);
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  overflow:hidden;
+  pointer-events:none;
+}
+.madNoiseText::before {
+  color:#ff003c;
+  transform:translate(-2px,1px);
+  clip-path:inset(0 0 48% 0);
+}
+.madNoiseText::after {
+  color:#00eaff;
+  transform:translate(3px,-1px);
+  clip-path:inset(55% 0 0 0);
+}
+@keyframes madTextFly {
+  0% { opacity:0; transform:translate3d(var(--mx0),var(--my0),0) scale(.2) rotate(var(--mr0)); filter:blur(7px); }
+  12% { opacity:1; }
+  47% { opacity:.85; transform:translate3d(var(--mx1),var(--my1),0) scale(1.05) rotate(var(--mr1)); filter:blur(0); }
+  100% { opacity:0; transform:translate3d(var(--mx2),var(--my2),0) scale(var(--ms,1.8)) rotate(var(--mr2)); filter:blur(5px); }
+}
+
+/* Critical phase becomes visibly more unstable. */
+#insanityOverlay[data-phase="critical"] #insanityPanel {
+  border-color:rgba(255,0,60,.95);
+  box-shadow:inset 0 0 100px rgba(255,0,60,.16),0 0 160px rgba(255,0,60,.4);
+}
+#insanityOverlay[data-phase="critical"] #insanityTitle {
+  color:#ff003c;
+  text-shadow:0 0 4px #fff,2px 0 #00eaff,-3px 0 #ff003c,0 0 55px #ff003c;
+}
+#insanityOverlay[data-phase="critical"] #insanityScanlines { opacity:.65; }
+#insanityOverlay[data-phase="critical"] #insanityNoiseCanvas { opacity:.35; }
+
+/* Release screen */
+#insanityOverlay[data-phase="release"] {
+  pointer-events:none !important;
+  animation:madRelease .95s ease-out both !important;
+}
+@keyframes madRelease {
+  0% { opacity:1; filter:none; }
+  18% { opacity:.2; filter:invert(1); }
+  35% { opacity:1; filter:none; }
+  60% { opacity:.8; filter:blur(2px); }
+  100% { opacity:0; filter:blur(10px); }
+}
+
+@media (max-width:850px) {
+  #insanityPanel {
+    min-height:74dvh;
+    padding:24px 16px;
+  }
+  #insanitySub { max-width:90vw; }
+  #insanityEyebrow { font-size:8px; letter-spacing:.13em; }
+  #insanityWarning { font-size:8px; }
+  #insanityCoordinates,#insanityExitHint { font-size:7px; }
+}
