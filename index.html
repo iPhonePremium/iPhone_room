@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>iPhoneの部屋。｜終焉極限・発狂ロック完全版</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Sans+JP:wght@300;400;700;900&family=Shippori+Mincho:wght@500;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 初回起動時タップ要求：音声をブラウザのユーザー操作制限内で有効化 -->
+<div id="bootScreen">
+  <h1 class="glitch">iPhoneの部屋。</h1>
+  <p>[ 画面をタップして暗黒通信を接続する ]</p>
+</div>
+
+<div id="fake-webcam"><div class="dot"></div>REC</div>
+<canvas id="noiseCanvas"></canvas>
+<div id="blood"></div>
+<div id="blackout"><span>■■■■■</span></div>
+<div id="progress"></div>
+
+<header class="nav">
+  <a class="logo glitch" href="#top"><i></i>iPhone_ROOM // ULTIMATE</a>
+  <nav class="navlinks">
+    <a href="#about">01_ENTITY</a><a href="#gallery">02_ARCHIVE</a><a href="#music">03_SOUND</a><a href="#terminal">04_TERMINAL</a>
+  </nav>
+  <div class="san glitch">SAN <span class="sanbar"><span class="sanfill" id="sanFill"></span></span><span id="sanVal">100%</span></div>
+</header>
+
+<section class="hero" id="top">
+ <div class="heroContent">
+   <div class="kicker glitch">WARNING: NEURAL LINK ESTABLISHED</div>
+   <h1 class="glitch">iPhoneの<br>部屋。</h1>
+   <p class="scramble-text">ここはすでにあなたの現実ではない。<br>スクロールするたび、音響と視線が同調していく。<br>もう、このページを閉じても彼女は消えない。</p>
+   <div class="heroButtons">
+     <a class="btn" href="#about">深淵へ潜る ↓</a>
+   </div>
+ </div>
+ <div class="scrollHint">DON'T LOOK BACK</div>
+</section>
+
+<main>
+<section class="section" id="about">
+ <div class="sectionHead reveal"><div><div class="tag glitch">01 // SUBJECT_PROFILE</div><h2>被験体：iPhone</h2></div><div class="meta">CONNECTION: STABLE / HOSTAGE</div></div>
+ <div class="profile">
+  <div class="portrait reveal"><img src="kafu-01.png" alt="iPhoneの記録"><span class="rec glitch">REC_CAMERA_01</span></div>
+  <div class="card reveal delay1">
+   <div class="tag">ENTITY SPECS // RESTRICTED</div><h3>iPhone</h3>
+   <p class="scramble-text">「iPhone」はもはや電子機器の名前ではなく、この領域を支配する概念の名称。画面を開いた瞬間から、観測者と被験体の立場は完全に逆転している。</p>
+   <div class="stats">
+    <div class="stat"><small>HOST STATUS</small><strong class="glitch" style="color:var(--red)">CORRUPTED</strong></div>
+    <div class="stat"><small>OBSERVATION</small><strong>STARING AT YOU</strong></div>
+    <div class="stat"><small>THREAT LEVEL</small><strong class="glitch" style="color:var(--red)">CLASS-X FATAL</strong></div>
+    <div class="stat"><small>EXIT</small><strong>DELETED</strong></div>
+   </div>
+   <div class="quote glitch scramble-text">「逃げなくていいよ。ここにいるなら、ずっと見てるから。」</div>
+  </div>
+ </div>
+</section>
+
+<!-- ギャラリーセクション（全6枚の画像を完全に埋め込み） -->
+<section class="section" id="gallery">
+ <div class="sectionHead reveal"><div><div class="tag">02 // VISUAL_ARCHIVES</div><h2>残骸画像ギャラリー</h2></div><div class="meta">TOTAL: 06 LOGS (UNLOCKED)</div></div>
+ <div class="gallery">
+  <article class="g reveal" data-img="room-01.png"><img src="room-01.png" alt="暗い部屋の記録"><div class="ghost">もう逃げられない</div><div class="caption"><b>REC_001 // ROOM_CORRIDOR</b><span>20XX/08/08 23:57:39</span></div></article>
+  <article class="g reveal delay1" data-img="1000000273.png"><img src="1000000273.png" alt="可不 サイバー空間"><div class="ghost">ずっと見てる</div><div class="caption"><b>REC_002 // CYBER_CITY</b><span>青い都市のノイズ</span></div></article>
+  <article class="g reveal delay2" data-img="room-02.png"><img src="room-02.png" alt="侵食された部屋"><div class="ghost">うしろ、むいて</div><div class="caption"><b>REC_003 // CLOSE_UP</b><span>血手形と接触</span></div></article>
+  <article class="g reveal delay3" data-img="1000000234.jpg"><img src="1000000234.jpg" alt="暗がりの少女"><div class="ghost">私だけを見て</div><div class="caption"><b>REC_004 // DARK_ROOM</b><span>不可能の微笑み</span></div></article>
+  <article class="g reveal delay1" data-img="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png"><img src="c435b9a2-9026-430f-9e16-f5abff2b5efc-1_all_68.png" alt="ミクの部屋"><div class="ghost">消えたいよ...</div><div class="caption"><b>REC_005 // ILL_ROOM_MIKU</b><span>自傷と依存の病棟</span></div></article>
+  <article class="g reveal delay2" data-img="kafu-01.png"><img src="kafu-01.png" alt="可不 ナイフ"><div class="ghost">愛してる♡</div><div class="caption"><b>REC_006 // YANDERE_KAFU</b><span>刃物を持つ不可解</span></div></article>
+ </div>
+</section>
+
+
+<!-- MUSIC DECK // 6 TRACKS -->
+<section class="section" id="music">
+  <div class="sectionHead reveal">
+    <div><div class="tag glitch">03 // SOUND ARCHIVE</div><h2>暗黒音響選択室</h2></div>
+    <div class="meta">6 TRACKS / LOCAL WAV</div>
+  </div>
+  <div id="musicDeck" class="reveal">
+    <div id="musicNowPlaying">NO TRACK SELECTED // AUDIO STANDBY</div>
+    <div class="music-grid" style="margin-top:18px">
+      <button class="music-track" data-track="music_black_room.wav"><span class="track-no">TRACK 01</span><strong>BLACK ROOM</strong><small>暗い部屋 / LOW DRONE</small></button>
+      <button class="music-track" data-track="music_corrupted_signal.wav"><span class="track-no">TRACK 02</span><strong>CORRUPTED SIGNAL</strong><small>壊れた信号 / STATIC</small></button>
+      <button class="music-track" data-track="music_empty_hall.wav"><span class="track-no">TRACK 03</span><strong>EMPTY HALL</strong><small>無人廊下 / REVERB</small></button>
+      <button class="music-track" data-track="music_last_room.wav"><span class="track-no">TRACK 04</span><strong>LAST ROOM</strong><small>最後の部屋 / FINAL</small></button>
+      <button class="music-track" data-track="music_sleepless.wav"><span class="track-no">TRACK 05</span><strong>SLEEPLESS</strong><small>眠れない / HEARTBEAT</small></button>
+      <button class="music-track" data-track="music_watching.wav"><span class="track-no">TRACK 06</span><strong>WATCHING</strong><small>監視 / EYES</small></button>
+    </div>
+    <div class="music-controls">
+      <button id="musicPlay">PLAY</button>
+      <button id="musicPause">PAUSE</button>
+      <button id="musicStop">STOP</button>
+      <button id="musicNext">NEXT</button>
+      <label style="font:10px 'Share Tech Mono';color:#777">VOL <input id="musicVolume" class="music-range" type="range" min="0" max="1" step="0.01" value="0.55"></label>
+      <label style="font:10px 'Share Tech Mono';color:#777"><input id="musicLoop" type="checkbox"> LOOP</label>
+    </div>
+    <audio id="musicPlayer" preload="metadata"></audio>
+  </div>
+</section>
+
+<!-- 3 NEW HORROR FUNCTIONS -->
+<section class="section" id="control">
+  <div class="sectionHead reveal">
+    <div><div class="tag glitch">04 // ACTIVE ANOMALIES</div><h2>異常制御室</h2></div>
+    <div class="meta">3 SYSTEMS ONLINE</div>
+  </div>
+  <div id="fearControlGrid">
+    <article class="fear-control reveal">
+      <h3>① ランダム恐怖イベント</h3>
+      <p>ブラックアウト、グリッチ、警告文をランダム発生。発狂モードとは別系統で動作します。</p>
+      <button id="scareEventBtn">異常イベントを発生</button>
+    </article>
+    <article class="fear-control reveal">
+      <h3>② 監視者システム</h3>
+      <p>カーソルの動きを監視する赤い点。一定時間後、カーソルとは違う場所へ勝手に移動します。</p>
+      <button id="watcherBtn">監視者を起動</button>
+    </article>
+    <article class="fear-control reveal">
+      <h3>③ 異常ログ・自動記録</h3>
+      <p>サイト内で起きたイベントをリアルタイム記録。何もしていない時にもログが増えることがあります。</p>
+      <button id="logBurstBtn">ログを強制生成</button>
+    </article>
+  </div>
+  <div id="eventFeed" class="reveal" aria-live="polite"></div>
+</section>
+
+<!-- 対話端末ターミナル -->
+<section class="section" id="terminal">
+ <div class="sectionHead reveal"><div><div class="tag">03 // DIRECT_LINK</div><h2>対話端末 (CONSOLE_MODE)</h2></div><div class="meta">LOCAL SESSION ACTIVE</div></div>
+ <div class="terminal reveal">
+  <div class="termTop glitch"><span>root@iphone_room:~#</span> <span>STATUS: DANGER</span></div>
+  <div class="termBody" id="termBody">
+   <div class="termLine">booting memory... OK</div>
+   <div class="termLine">searching for user... FOUND MATCH</div>
+   <div class="termLine red glitch">WARNING: DO NOT LOOK AWAY FROM THE SCREEN.</div>
+   <div class="termLine">type <b style="color:#fff">help</b> for commands.</div>
+  </div>
+  <div class="termInput"><input id="termInput" placeholder="_" autocomplete="off"><button id="termSend">EXECUTE</button></div>
+ </div>
+</section>
+
+<!-- 異常現象記録カード -->
+<section class="section">
+ <div class="sectionHead reveal"><div><div class="tag">04 // ANOMALIES</div><h2>異常現象記録</h2></div></div>
+ <div class="fearGrid">
+  <article class="fear reveal"><div class="num">ANOMALY_01</div><h3>時計の狂い</h3><p class="scramble-text">現実の時間と画面の時計が一致しなくなる。深夜になるほど、そのズレは大きくなる。</p></article>
+  <article class="fear reveal delay1"><div class="num">ANOMALY_02</div><h3>這いずる音</h3><p class="scramble-text">ページをスクロールするたび、ヘッドホンから微かに何かを引きずる音が聞こえる。</p></article>
+  <article class="fear reveal delay2"><div class="num">ANOMALY_03</div><h3>視線の固定</h3><p class="scramble-text">画像を閉じた後も、網膜に彼女の目が焼き付いて離れなくなる。</p></article>
+ </div>
+</section>
+
+<!-- 精神汚染限界エリア -->
+<section class="section" id="collapse">
+ <div class="insanityZone reveal">
+  <div class="tag glitch">05 // FATAL OVERRIDE</div>
+  <h2 class="glitch">精神汚染限界</h2>
+  <p class="scramble-text">この先を押すと、ブラウザ環境の制限が完全に破られ、空間が崩壊します。覚悟のある方のみ押してください。</p>
+  <button class="btn glitch" id="insanityBtn">発狂モードを強制起動</button>
+  <button class="btn" id="resetBtn">緊急停止プロトコル</button>
+ </div>
+</section>
+</main>
+
+<!-- =========================================================
+     ULTIMATE INSANITY OVERLAY
+     IMPORTANT: this element is the LAST visual layer in <body>.
+     It is NOT inside <main>, .hero, .nav, or any transformed element.
+     ========================================================= -->
+<div id="insanityOverlay" aria-hidden="true">
+  <canvas id="insanityNoiseCanvas"></canvas>
+  <div id="insanityBlack"></div>
+  <div id="insanityScanlines"></div>
+  <div id="insanityVignette"></div>
+  <div id="insanityChromatic"></div>
+  <div id="insanityGlitchBands"></div>
+  <div id="insanityTextField" aria-hidden="true"></div>
+  <div id="insanityCore">
+    <div id="insanityPanel">
+      <div id="insanityEyebrow">FULLSCREEN OVERRIDE // VIEWPORT LOCK // INPUT SUSPENDED</div>
+      <div id="insanityWarning">WARNING // NEURAL SIGNAL CORRUPTED</div>
+      <h2 id="insanityTitle">発狂</h2>
+      <div id="insanityCorruptTitle" aria-hidden="true">発▒狂̷̴</div>
+      <p id="insanitySub">
+        画面は固定されています。スクロール位置に関係なく、このレイヤーは常に画面全体を覆います。<br>
+        マウス・タッチ・ホイール・キーボード操作は一時的に無効です。
+      </p>
+      <div id="insanityTimerWrap">
+        <div id="insanityTimerLabel">
+          <span>MENTAL LOCK // ACTIVE</span>
+          <span id="insanityRemainLabel">AUTO RELEASE</span>
+        </div>
+        <div id="insanityTimer">12.0</div>
+        <div id="insanityTimerTrack"><div id="insanityTimerFill"></div></div>
+      </div>
+      <div id="insanityStatus">入力を受け付けていません。</div>
+      <div id="insanityCoordinates">X:--- Y:--- // VIEWPORT:LOCKED // SIGNAL:████</div>
+      <div id="insanityExitHint">SESSION WILL END AUTOMATICALLY</div>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox"><button id="closeLight">×</button><img id="lightImg" src="" alt=""></div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
+
